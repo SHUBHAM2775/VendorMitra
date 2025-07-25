@@ -32,6 +32,18 @@ const Supplier = () => {
   const [products, setProducts] = useState(initialProducts);
   const [editIndex, setEditIndex] = useState(null);
   const [editProduct, setEditProduct] = useState(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [showToast, setShowToast] = useState(null); // { type: 'success'|'error', message: string }
+  const [form, setForm] = useState({
+    name: "",
+    desc: "",
+    category: "",
+    price: "",
+    deliveryType: "instant",
+    stock: "",
+    supplierId: "SUPPLIER_ID_PLACEHOLDER" // TODO: Replace with real supplierId from context/token
+  });
+  const [adding, setAdding] = useState(false);
 
   const handleEditClick = (idx) => {
     const { category, price, stock, status } = products[idx];
@@ -59,8 +71,177 @@ const Supplier = () => {
     setEditProduct(null);
   };
 
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddProduct = (e) => {
+    e.preventDefault();
+    // Basic validation
+    if (!form.name || !form.desc || !form.category || !form.price || !form.stock) {
+      setShowToast({ type: "error", message: "Please fill all required fields." });
+      return;
+    }
+    setAdding(true);
+    // Simulate API call
+    setTimeout(() => {
+      setProducts((prev) => [
+        {
+          name: form.name,
+          desc: form.desc,
+          category: form.category,
+          price: form.price,
+          stock: form.stock,
+          status: "available",
+          deliveryType: form.deliveryType,
+          supplierId: form.supplierId
+        },
+        ...prev
+      ]);
+      setShowToast({ type: "success", message: "Product added successfully!" });
+      setForm({
+        name: "",
+        desc: "",
+        category: "",
+        price: "",
+        deliveryType: "instant",
+        stock: "",
+        supplierId: form.supplierId
+      });
+      setAdding(false);
+    }, 800);
+  };
+
+  const handleOkToast = () => {
+    setShowToast(null);
+    setShowAddForm(false);
+  };
+
   return (
     <div className="min-h-screen bg-[#faf8ff]">
+      {/* Add Product Button */}
+      <div className="max-w-2xl mx-auto flex justify-end mt-8 mb-2">
+        <button
+          className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition"
+          onClick={() => setShowAddForm(true)}
+        >
+          + Add Product
+        </button>
+      </div>
+      {/* Add Product Form (conditional) */}
+      {showAddForm && (
+        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4">Add Product</h2>
+          <form className="grid grid-cols-1 md:grid-cols-2 gap-4" onSubmit={handleAddProduct}>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+              <input
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={handleFormChange}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-200"
+                placeholder="e.g. Premium Basmati Rice"
+                required
+              />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description (include quantity, e.g. 25 kg)</label>
+              <textarea
+                name="desc"
+                value={form.desc}
+                onChange={handleFormChange}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-200"
+                placeholder="e.g. High quality aged basmati rice, 25kg bag"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select
+                name="category"
+                value={form.category}
+                onChange={handleFormChange}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-200"
+                required
+              >
+                <option value="">Select category</option>
+                <option value="Grains">Grains</option>
+                <option value="Spices">Spices</option>
+                <option value="Oils">Oils</option>
+                <option value="Pulses">Pulses</option>
+                <option value="Beverages">Beverages</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
+              <input
+                type="number"
+                name="price"
+                value={form.price}
+                onChange={handleFormChange}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-200"
+                placeholder="e.g. 2500"
+                min="1"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Type</label>
+              <select
+                name="deliveryType"
+                value={form.deliveryType}
+                onChange={handleFormChange}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-200"
+              >
+                <option value="instant">Instant</option>
+                <option value="scheduled">Scheduled</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Stock (packs available)</label>
+              <input
+                type="number"
+                name="stock"
+                value={form.stock}
+                onChange={handleFormChange}
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-200"
+                placeholder="e.g. 50"
+                min="1"
+                required
+              />
+            </div>
+            <input type="hidden" name="supplierId" value={form.supplierId} />
+            <div className="col-span-2 flex justify-end mt-2">
+              <button
+                type="submit"
+                className="bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 transition disabled:opacity-60"
+                disabled={adding}
+              >
+                {adding ? "Adding..." : "Add Product"}
+              </button>
+            </div>
+          </form>
+          {showToast && showToast.type === "success" && (
+            <div className="mt-4 px-4 py-2 rounded text-white font-medium bg-green-500 flex items-center justify-between">
+              <span>Product added successfully!</span>
+              <button
+                className="ml-4 bg-white text-green-700 px-3 py-1 rounded font-semibold border border-green-600 hover:bg-green-50 transition"
+                onClick={handleOkToast}
+              >
+                OK
+              </button>
+            </div>
+          )}
+          {showToast && showToast.type === "error" && (
+            <div className="mt-4 px-4 py-2 rounded text-white font-medium bg-red-500">
+              {showToast.message}
+            </div>
+          )}
+        </div>
+      )}
       {/* Header removed: now handled globally by Header.jsx */}
 
       {/* Summary Cards */}
@@ -95,7 +276,7 @@ const Supplier = () => {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Product Catalog</h2>
-              <button className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition">+ Add Product</button>
+              {/* The "+ Add Product" button is now outside the form */}
             </div>
             <table className="w-full text-left">
               <thead>
