@@ -6,5 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const routes = require("./routes"); // Assuming this is your index router file
+app.use("/api", routes);
 
 module.exports = app;
