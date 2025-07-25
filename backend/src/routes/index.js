@@ -1,9 +1,10 @@
-import express from 'express';
-// import authRoutes from './authRoutes';
+const express = require("express");
+const authRoutes = require("./authRoutes");
+const productRoutes = require("./productRoutes");
 
 const router = express.Router();
 
-// Use authentication routes
-// router.use('/auth', authRoutes);
+router.use("/auth", authRoutes);
+router.use("/prod", productRoutes);
 
-export default router;
+module.exports = router;
