@@ -3,7 +3,7 @@ import { FaShoppingCart, FaGlobeAsia, FaUserFriends } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import Login from "../auth/Login";
 
-const Header = () => {
+const Header = ({ onSupplierView }) => {
   const { t, i18n } = useTranslation();
   const language = i18n.language;
   const [showLogin, setShowLogin] = useState(false);
@@ -35,7 +35,7 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Right: Language Toggle, Login/Signup or User Info/Cart */}
+      {/* Right: Language Toggle, Supplier View, Login/Signup or User Info/Cart */}
       <div className="flex items-center gap-4">
         <div className="flex items-center bg-gray-50 border rounded-lg px-2 py-1">
           <FaGlobeAsia className="mr-2 text-gray-500" />
@@ -60,6 +60,13 @@ const Header = () => {
             हिंदी
           </button>
         </div>
+        {/* Supplier View Button */}
+        <button
+          className="border px-4 py-2 rounded-lg shadow-sm hover:bg-green-100 transition text-green-700 font-medium"
+          onClick={onSupplierView}
+        >
+          Supplier View
+        </button>
         {!user && (
           <button
             className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg"
