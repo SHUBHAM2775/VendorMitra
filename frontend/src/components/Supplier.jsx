@@ -1,13 +1,6 @@
 import React, { useState } from "react";
 import { FaBox, FaShoppingCart, FaTruck, FaRupeeSign, FaStar } from "react-icons/fa";
 
-const summaryData = [
-  { label: "Total Products", value: 2, icon: <FaBox className="text-green-600 text-xl" /> },
-  { label: "Pending Orders", value: 1, icon: <FaShoppingCart className="text-yellow-500 text-xl" /> },
-  { label: "In Transit", value: 0, icon: <FaTruck className="text-blue-500 text-xl" /> },
-  { label: "Monthly Revenue", value: "₹45,670", icon: <FaRupeeSign className="text-green-600 text-xl" /> },
-];
-
 const initialProducts = [
   {
     name: "Premium Basmati Rice",
@@ -44,6 +37,14 @@ const Supplier = () => {
     supplierId: "SUPPLIER_ID_PLACEHOLDER" // TODO: Replace with real supplierId from context/token
   });
   const [adding, setAdding] = useState(false);
+
+  // Dynamic summary data that updates based on current state
+  const getSummaryData = () => [
+    { label: "Total Products", value: products.length, icon: <FaBox className="text-green-600 text-xl" /> },
+    { label: "Pending Orders", value: 1, icon: <FaShoppingCart className="text-yellow-500 text-xl" /> },
+    { label: "In Transit", value: 0, icon: <FaTruck className="text-blue-500 text-xl" /> },
+    { label: "Monthly Revenue", value: "₹45,670", icon: <FaRupeeSign className="text-green-600 text-xl" /> },
+  ];
 
   const handleEditClick = (idx) => {
     const { category, price, stock, status } = products[idx];
@@ -122,7 +123,7 @@ const Supplier = () => {
     <div className="min-h-screen bg-[#faf8ff]">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 px-8 py-6">
-        {summaryData.map((item) => (
+        {getSummaryData().map((item) => (
           <div key={item.label} className="bg-white rounded-lg shadow p-4 flex items-center gap-4">
             <div>{item.icon}</div>
             <div>
