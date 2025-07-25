@@ -38,11 +38,40 @@ const Supplier = () => {
   });
   const [adding, setAdding] = useState(false);
 
+  // Dynamic orders state
+  const [orders, setOrders] = useState([
+    {
+      id: "ORD001",
+      customer: "Raj Kumar",
+      phone: "+91 98765 43210",
+      address: "Shop 123, Andheri West, Mumbai",
+      orderDate: "2024-01-15",
+      items: [
+        { name: "Premium Basmati Rice", quantity: 2, price: 5000 },
+        { name: "Organic Turmeric Powder", quantity: 1, price: 450 }
+      ],
+      total: 5450,
+      status: "pending"
+    },
+    {
+      id: "ORD002",
+      customer: "Priya Sharma",
+      phone: "+91 98765 43211",
+      address: "B-45, Connaught Place, New Delhi",
+      orderDate: "2024-01-14",
+      items: [
+        { name: "Premium Basmati Rice", quantity: 1, price: 2500 }
+      ],
+      total: 2500,
+      status: "accepted"
+    }
+  ]);
+
   // Dynamic summary data that updates based on current state
   const getSummaryData = () => [
     { label: "Total Products", value: products.length, icon: <FaBox className="text-green-600 text-xl" /> },
-    { label: "Pending Orders", value: 1, icon: <FaShoppingCart className="text-yellow-500 text-xl" /> },
-    { label: "In Transit", value: 0, icon: <FaTruck className="text-blue-500 text-xl" /> },
+    { label: "Pending Orders", value: orders.filter(order => order.status === "pending").length, icon: <FaShoppingCart className="text-yellow-500 text-xl" /> },
+    { label: "In Transit", value: orders.filter(order => order.status === "dispatched").length, icon: <FaTruck className="text-blue-500 text-xl" /> },
     { label: "Monthly Revenue", value: "₹45,670", icon: <FaRupeeSign className="text-green-600 text-xl" /> },
   ];
 
@@ -112,6 +141,24 @@ const Supplier = () => {
       });
       setAdding(false);
     }, 800);
+  };
+
+  const handleAcceptOrder = (orderId) => {
+    setOrders(prev => prev.map(order => 
+      order.id === orderId ? { ...order, status: "accepted" } : order
+    ));
+  };
+
+  const handleRejectOrder = (orderId) => {
+    setOrders(prev => prev.map(order => 
+      order.id === orderId ? { ...order, status: "rejected" } : order
+    ));
+  };
+
+  const handleMarkDispatched = (orderId) => {
+    setOrders(prev => prev.map(order => 
+      order.id === orderId ? { ...order, status: "dispatched" } : order
+    ));
   };
 
   const handleOkToast = () => {
@@ -384,43 +431,75 @@ const Supplier = () => {
         {tab === "Orders" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Incoming Orders</h2>
-            <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded mb-4">
-              <div className="font-semibold">Order #ORD001 <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs ml-2">pending</span></div>
-              <div className="text-sm text-gray-700">Raj Kumar · +91 98765 43210</div>
-              <div className="text-xs text-gray-500 mb-2">Shop 123, Andheri West, Mumbai · Order Date: 2024-01-15</div>
-              <div className="text-sm">Items:</div>
-              <ul className="text-xs text-gray-700 mb-2">
-                <li>Premium Basmati Rice x 2 – ₹5000</li>
-                <li>Organic Turmeric Powder x 1 – ₹450</li>
-              </ul>
-              <div className="font-semibold">Total: ₹5450</div>
-              <div className="flex gap-2 mt-2">
-                <button className="px-4 py-1 rounded bg-gray-200 hover:bg-gray-300">Reject</button>
-                <button className="px-4 py-1 rounded bg-green-600 text-white hover:bg-green-700">Accept</button>
+            {orders.map((order) => (
+              <div key={order.id} className={`border-l-4 p-4 rounded mb-4 ${
+                order.status === "pending" ? "bg-yellow-50 border-yellow-400" :
+                order.status === "accepted" ? "bg-green-50 border-green-400" :
+                order.status === "dispatched" ? "bg-blue-50 border-blue-400" :
+                "bg-red-50 border-red-400"
+              }`}>
+                <div className="font-semibold">
+                  Order #{order.id} 
+                  <span className={`px-2 py-1 rounded text-xs ml-2 ${
+                    order.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                    order.status === "accepted" ? "bg-green-100 text-green-700" :
+                    order.status === "dispatched" ? "bg-blue-100 text-blue-700" :
+                    "bg-red-100 text-red-700"
+                  }`}>
+                    {order.status}
+                  </span>
+                </div>
+                <div className="text-sm text-gray-700">{order.customer} · {order.phone}</div>
+                <div className="text-xs text-gray-500 mb-2">{order.address} · Order Date: {order.orderDate}</div>
+                <div className="text-sm">Items:</div>
+                <ul className="text-xs text-gray-700 mb-2">
+                  {order.items.map((item, idx) => (
+                    <li key={idx}>{item.name} x {item.quantity} – ₹{item.price}</li>
+                  ))}
+                </ul>
+                <div className="font-semibold">Total: ₹{order.total}</div>
+                {order.status === "pending" && (
+                  <div className="flex gap-2 mt-2">
+                    <button 
+                      className="px-4 py-1 rounded bg-gray-200 hover:bg-gray-300"
+                      onClick={() => handleRejectOrder(order.id)}
+                    >
+                      Reject
+                    </button>
+                    <button 
+                      className="px-4 py-1 rounded bg-green-600 text-white hover:bg-green-700"
+                      onClick={() => handleAcceptOrder(order.id)}
+                    >
+                      Accept
+                    </button>
+                  </div>
+                )}
               </div>
-            </div>
-            <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-              <div className="font-semibold">Order #ORD002 <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs ml-2">accepted</span></div>
-              <div className="text-sm text-gray-700">Priya Sharma · +91 98765 43211</div>
-              <div className="text-xs text-gray-500 mb-2">B-45, Connaught Place, New Delhi · Order Date: 2024-01-14</div>
-              <div className="text-sm">Items:</div>
-              <ul className="text-xs text-gray-700 mb-2">
-                <li>Premium Basmati Rice x 1 – ₹2500</li>
-              </ul>
-              <div className="font-semibold">Total: ₹2500</div>
-            </div>
+            ))}
           </div>
         )}
         {tab === "Dispatch" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Dispatch Management</h2>
-            <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-              <div className="font-semibold">Order #ORD002 <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs ml-2">accepted</span></div>
-              <div className="text-sm text-gray-700">Priya Sharma · +91 98765 43211</div>
-              <div className="text-xs text-gray-500 mb-2">B-45, Connaught Place, New Delhi</div>
-              <div className="font-semibold">Total: ₹2500</div>
-              <button className="mt-2 px-4 py-1 rounded bg-green-600 text-white hover:bg-green-700">Mark Dispatched</button>
-            </div>
+            {orders.filter(order => order.status === "accepted").map((order) => (
+              <div key={order.id} className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
+                <div className="font-semibold">
+                  Order #{order.id} 
+                  <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs ml-2">
+                    {order.status}
+                  </span>
+                </div>
+                <div className="text-sm text-gray-700">{order.customer} · {order.phone}</div>
+                <div className="text-xs text-gray-500 mb-2">{order.address}</div>
+                <div className="font-semibold">Total: ₹{order.total}</div>
+                <button 
+                  className="mt-2 px-4 py-1 rounded bg-green-600 text-white hover:bg-green-700"
+                  onClick={() => handleMarkDispatched(order.id)}
+                >
+                  Mark Dispatched
+                </button>
+              </div>
+            ))}
           </div>
         )}
       </div>
