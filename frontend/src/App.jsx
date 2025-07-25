@@ -3,11 +3,18 @@ import Header from "./components/Header";
 import Home from "./components/Home";
 import Supplier from "./components/Supplier";
 import Cart from "./components/Cart";
+import { Routes, Route, useNavigate } from "react-router-dom";
 
-const App = () => {
-  const [showSupplier, setShowSupplier] = useState(false);
+const supplierInfo = {
+  name: "Mumbai Fresh Supplies",
+  rating: 4.5,
+  reviews: 127
+};
+
+function App() {
   const [cartItems, setCartItems] = useState([]);
   const [showCart, setShowCart] = useState(false);
+  const navigate = useNavigate();
 
   const handleAddToCart = (product) => {
     const exists = cartItems.find((item) => item.id === product.id);
@@ -38,11 +45,15 @@ const App = () => {
   return (
     <>
       <Header
-        onSupplierView={() => setShowSupplier(true)}
+        onSupplierView={() => navigate("/supplier")}
         cartItems={cartItems}
         onCartClick={() => setShowCart(true)}
+        supplierInfo={location.pathname === "/supplier" ? supplierInfo : undefined}
       />
-      {showSupplier ? <Supplier /> : <Home onAddToCart={handleAddToCart} />}
+      <Routes>
+        <Route path="/" element={<Home onAddToCart={handleAddToCart} />} />
+        <Route path="/supplier" element={<Supplier />} />
+      </Routes>
       {showCart && (
         <Cart
           items={cartItems}
@@ -53,6 +64,6 @@ const App = () => {
       )}
     </>
   );
-};
+}
 
 export default App;

@@ -8,14 +8,14 @@ const summaryData = [
   { label: "Monthly Revenue", value: "₹45,670", icon: <FaRupeeSign className="text-green-600 text-xl" /> },
 ];
 
-const products = [
+const initialProducts = [
   {
     name: "Premium Basmati Rice",
     desc: "High quality aged basmati rice, 25kg bag",
     category: "Grains",
     price: "₹2500",
     stock: 50,
-    status: "active",
+    status: "available",
   },
   {
     name: "Organic Turmeric Powder",
@@ -23,36 +23,45 @@ const products = [
     category: "Spices",
     price: "₹450",
     stock: 30,
-    status: "active",
+    status: "available",
   },
 ];
 
 const Supplier = () => {
   const [tab, setTab] = useState("Products");
+  const [products, setProducts] = useState(initialProducts);
+  const [editIndex, setEditIndex] = useState(null);
+  const [editProduct, setEditProduct] = useState(null);
+
+  const handleEditClick = (idx) => {
+    const { category, price, stock, status } = products[idx];
+    setEditIndex(idx);
+    setEditProduct({ category, price, stock, status });
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditProduct((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditSave = () => {
+    setProducts((prev) =>
+      prev.map((p, idx) =>
+        idx === editIndex ? { ...p, ...editProduct } : p
+      )
+    );
+    setEditIndex(null);
+    setEditProduct(null);
+  };
+
+  const handleEditCancel = () => {
+    setEditIndex(null);
+    setEditProduct(null);
+  };
 
   return (
     <div className="min-h-screen bg-[#faf8ff]">
-      {/* Header */}
-      <header className="bg-white shadow-md py-4 px-8 flex justify-between items-center">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🌱</span>
-            <span className="text-2xl font-bold text-green-600">RawMart Supplier</span>
-          </div>
-          <div className="text-sm text-gray-500 -mt-1">Supplier Dashboard</div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <div className="text-gray-500 text-sm">Welcome,</div>
-            <div className="font-medium text-gray-800">Mumbai Fresh Supplies</div>
-          </div>
-          <div className="flex items-center gap-1 text-yellow-600 font-semibold">
-            <FaStar className="text-lg" />
-            <span>4.5</span>
-            <span className="text-gray-400 text-xs">(127 reviews)</span>
-          </div>
-        </div>
-      </header>
+      {/* Header removed: now handled globally by Header.jsx */}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 px-8 py-6">
@@ -100,20 +109,83 @@ const Supplier = () => {
                 </tr>
               </thead>
               <tbody>
-                {products.map((p) => (
+                {products.map((p, idx) => (
                   <tr key={p.name} className="border-b last:border-b-0">
                     <td className="py-3">
                       <div className="font-semibold text-gray-800">{p.name}</div>
                       <div className="text-xs text-gray-500">{p.desc}</div>
-                    </td>
-                    <td>{p.category}</td>
-                    <td>{p.price}</td>
-                    <td>{p.stock}</td>
-                    <td>
-                      <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold">{p.status}</span>
+                      {/* If you want to show unit, add here: */}
+                      {/* <div className="text-xs text-gray-400 italic">{p.unit}</div> */}
                     </td>
                     <td>
-                      <button className="border px-3 py-1 rounded hover:bg-gray-100 transition">Edit</button>
+                      {editIndex === idx ? (
+                        <input
+                          className="border rounded px-2 py-1 w-full"
+                          name="category"
+                          value={editProduct.category}
+                          onChange={handleEditChange}
+                        />
+                      ) : (
+                        p.category
+                      )}
+                    </td>
+                    <td>
+                      {editIndex === idx ? (
+                        <input
+                          className="border rounded px-2 py-1 w-full"
+                          name="price"
+                          value={editProduct.price}
+                          onChange={handleEditChange}
+                        />
+                      ) : (
+                        p.price
+                      )}
+                    </td>
+                    <td>
+                      {editIndex === idx ? (
+                        <input
+                          className="border rounded px-2 py-1 w-full"
+                          name="stock"
+                          type="number"
+                          value={editProduct.stock}
+                          onChange={handleEditChange}
+                        />
+                      ) : (
+                        p.stock
+                      )}
+                    </td>
+                    <td>
+                      {editIndex === idx ? (
+                        <select
+                          className="border rounded px-2 py-1 w-full"
+                          name="status"
+                          value={editProduct.status}
+                          onChange={handleEditChange}
+                        >
+                          <option value="available">Available</option>
+                          <option value="unavailable">Unavailable</option>
+                        </select>
+                      ) : (
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-semibold ${
+                            p.status.trim() === "available"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {p.status.trim() === "available" ? "Available" : "Unavailable"}
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      {editIndex === idx ? (
+                        <>
+                          <button className="bg-green-600 text-white px-3 py-1 rounded mr-2" onClick={handleEditSave}>Save</button>
+                          <button className="bg-gray-300 text-gray-800 px-3 py-1 rounded" onClick={handleEditCancel}>Cancel</button>
+                        </>
+                      ) : (
+                        <button className="border px-3 py-1 rounded hover:bg-gray-100 transition" onClick={() => handleEditClick(idx)}>Edit</button>
+                      )}
                     </td>
                   </tr>
                 ))}
