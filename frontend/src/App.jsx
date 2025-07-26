@@ -57,10 +57,6 @@ function App() {
           supplierInfo={supplierInfo}
         />
 
-
-        <div style={{ textAlign: "right", margin: "10px 20px" }}>
-          <LanguageSwitcher />
-        </div>
         <Routes>
           <Route 
             path="/" 

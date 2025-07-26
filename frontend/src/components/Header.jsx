@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   FaShoppingCart,
   FaGlobeAsia,
   FaUserFriends,
   FaStar,
+  FaChevronDown,
 } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import Login from "../auth/Login";
@@ -14,11 +15,46 @@ const Header = ({ supplierInfo, cartCount = 0, onCartClick }) => {
   const { t, i18n } = useTranslation();
   const language = i18n.language;
   const [showLogin, setShowLogin] = useState(false);
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  const dropdownRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isLoading, login, logout } = useAuth();
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowLanguageDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const handleLoginClick = () => setShowLogin(true);
+  
+  // Language options
+  const languageOptions = [
+    { code: 'en', name: 'English' },
+    { code: 'hi', name: 'हिंदी' },
+    { code: 'gu', name: 'ગુજરાતી' },
+    { code: 'mr', name: 'मराठी' }
+  ];
+
+  const getCurrentLanguageName = () => {
+    const currentLang = languageOptions.find(lang => lang.code === language);
+    return currentLang ? currentLang.name : 'English';
+  };
+
+  const handleLanguageChange = (langCode) => {
+    i18n.changeLanguage(langCode);
+    setShowLanguageDropdown(false);
+  };
+
   const handleLoginSuccess = (userData) => {
     login(userData);
     setShowLogin(false);
@@ -63,30 +99,32 @@ const Header = ({ supplierInfo, cartCount = 0, onCartClick }) => {
           </div>
         </div>
 
-        {/* Right: Language Toggle, Login/Signup or User Info/Cart */}
+        {/* Right: Language Dropdown, Login/Signup or User Info/Cart */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center bg-gray-50 border rounded-lg px-2 py-1">
-            <FaGlobeAsia className="mr-2 text-gray-500" />
+          <div className="relative" ref={dropdownRef}>
             <button
-              className={`px-3 py-1 rounded-md font-semibold transition ${
-                language === "en"
-                  ? "bg-green-500 text-white"
-                  : "text-gray-700 hover:bg-gray-200"
-              }`}
-              onClick={() => i18n.changeLanguage("en")}
+              className="flex items-center bg-gray-50 border rounded-lg px-3 py-2 hover:bg-gray-100 transition"
+              onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
             >
-              EN
+              <FaGlobeAsia className="mr-2 text-gray-500" />
+              <span className="font-medium text-gray-700">{getCurrentLanguageName()}</span>
+              <FaChevronDown className={`ml-2 text-gray-500 transition-transform ${showLanguageDropdown ? 'rotate-180' : ''}`} />
             </button>
-            <button
-              className={`px-3 py-1 rounded-md font-semibold transition ${
-                language === "hi"
-                  ? "bg-green-500 text-white"
-                  : "text-gray-700 hover:bg-gray-200"
-              }`}
-              onClick={() => i18n.changeLanguage("hi")}
-            >
-              हिंदी
-            </button>
+            {showLanguageDropdown && (
+              <div className="absolute top-full right-0 mt-1 bg-white border rounded-lg shadow-lg py-1 min-w-[140px] z-50">
+                {languageOptions.map((lang) => (
+                  <button
+                    key={lang.code}
+                    className={`w-full text-left px-3 py-2 hover:bg-gray-100 transition ${
+                      language === lang.code ? 'bg-green-50 text-green-600 font-medium' : 'text-gray-700'
+                    }`}
+                    onClick={() => handleLanguageChange(lang.code)}
+                  >
+                    {lang.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           {!user && !isLoading && (
             <button
