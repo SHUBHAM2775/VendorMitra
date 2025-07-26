@@ -50,7 +50,12 @@ const Cart = ({ items, onClose, onRemoveItem, onUpdateQuantity }) => {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-                      className="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-full transition"
+                      disabled={item.quantity <= 1}
+                      className={`w-8 h-8 flex items-center justify-center rounded-full transition ${
+                        item.quantity <= 1 
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
+                          : "bg-gray-200 hover:bg-gray-300"
+                      }`}
                     >
                       <FaMinus className="text-xs" />
                     </button>
