@@ -5,13 +5,17 @@ const {
   getAllProducts,
   updateProduct,
   deleteProduct,
+  getProductById,
+  getProductsBySupplierId,
 } = require("../controllers/productController");
-const {authMiddleware} = require("../middleware/authMiddleware");
+const { authMiddleware } = require("../middleware/authMiddleware");
 
-// Assume auth middleware exists and sets req.user
-router.post("/add-product", authMiddleware, addProduct); // Supplier adds product
-router.get("/get-product", getAllProducts); // Anyone can view (no auth required)
-router.put("/update-product:id", authMiddleware, updateProduct); // Supplier updates
-router.delete("/delete-product:id", authMiddleware, deleteProduct); // Supplier deletes (soft)
+// Routes
+router.post("/add-product", authMiddleware, addProduct);
+router.get("/get-product", authMiddleware, getAllProducts);
+router.get("/get-product/:id", authMiddleware, getProductById);
+router.put("/update-product/:id", authMiddleware, updateProduct);
+router.delete("/delete-product/:id", authMiddleware, deleteProduct);
+router.get("/supplier/:supplierId", authMiddleware, getProductsBySupplierId);
 
 module.exports = router;

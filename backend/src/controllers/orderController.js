@@ -106,3 +106,63 @@ exports.updateOrderStatus = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+exports.getTotalOrderCount = async (req, res) => {
+  try {
+    const count = await Order.countDocuments();
+    res.status(200).json({ totalOrders: count });
+  } catch (error) {
+    console.error("Error getting total order count:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.getPendingOrderCount = async (req, res) => {
+  try {
+    const count = await Order.countDocuments({ status: "pending" });
+    res.status(200).json({ pendingOrders: count });
+  } catch (error) {
+    console.error("Error getting pending order count:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.getDispatchedOrdersForSupplier = async (req, res) => {
+  try {
+    const { supplierId } = req.params;
+
+    if (!supplierId) {
+      return res.status(400).json({ message: "Supplier ID is required" });
+    }
+
+    const orders = await Order.find({
+      supplierId,
+      status: "dispatched",
+    }).sort({ orderedAt: -1 }); // Optional: latest first
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Error fetching dispatched orders:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.getPendingOrdersForSupplier = async (req, res) => {
+  try {
+    const { supplierId } = req.params;
+
+    if (!supplierId) {
+      return res.status(400).json({ message: "Supplier ID is required" });
+    }
+
+    const orders = await Order.find({
+      supplierId,
+      status: "pending",
+    }).sort({ orderedAt: -1 }); // Sort by latest orders (optional)
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Error fetching pending orders:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
