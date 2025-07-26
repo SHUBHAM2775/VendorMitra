@@ -1,16 +1,98 @@
-import React from "react";
+import React, { useState } from "react";
 
 const AddProductForm = ({
   showAddForm,
   setShowAddForm,
   form,
   handleFormChange,
-  handleAddProduct,
+  handleAddProduct, // Add this prop
   adding,
   showToast,
-  handleOkToast
+  handleOkToast,
+  setShowToast // Ensure this is passed from the parent
 }) => {
+  const [imageProcessing, setImageProcessing] = useState(false);
+  
   if (!showAddForm) return null;
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setShowToast({ type: "error", message: "Please select a valid image file" });
+        return;
+      }
+      
+      // Validate file size (max 2MB for raw file)
+      if (file.size > 2 * 1024 * 1024) {
+        setShowToast({ type: "error", message: "Image size should be less than 2MB" });
+        return;
+      }
+
+      setImageProcessing(true);
+
+      // Create image element to resize
+      const img = new Image();
+      img.onload = () => {
+        // Create canvas for resizing
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Calculate new dimensions (max 800x600)
+        const maxWidth = 800;
+        const maxHeight = 600;
+        let { width, height } = img;
+        
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+        }
+        
+        // Set canvas dimensions and draw resized image
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convert to base64 with compression
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); // 70% quality
+        
+        // Check if compressed image is still too large (max 500KB base64)
+        if (compressedBase64.length > 500 * 1024) {
+          setShowToast({ type: "error", message: "Image is still too large after compression. Please choose a smaller image." });
+          setImageProcessing(false);
+          return;
+        }
+        
+        handleFormChange({
+          target: {
+            name: 'image',
+            value: compressedBase64
+          }
+        });
+        setImageProcessing(false);
+      };
+      
+      img.onerror = () => {
+        setShowToast({ type: "error", message: "Failed to load image. Please try another file." });
+        setImageProcessing(false);
+      };
+      
+      // Load the image
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto flex flex-col items-end mt-2 mb-6">
@@ -38,69 +120,87 @@ const AddProductForm = ({
             />
           </div>
           <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description (include quantity, e.g. 25 kg)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Product Image</label>
+            <div className="flex items-center space-x-4">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                disabled={imageProcessing}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100 disabled:opacity-50"
+                key={form.image ? 'with-image' : 'no-image'} // This will reset the input when form.image changes
+              />
+              {imageProcessing && (
+                <div className="flex items-center text-sm text-gray-500">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600 mr-2"></div>
+                  Processing...
+                </div>
+              )}
+              {form.image && !imageProcessing && (
+                <div className="flex-shrink-0">
+                  <img
+                    src={form.image}
+                    alt="Product preview"
+                    className="h-16 w-16 object-cover rounded-lg border"
+                  />
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Upload an image of your product (max 2MB, PNG/JPG/JPEG). Image will be automatically resized and compressed.
+            </p>
+          </div>
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <textarea
-              name="desc"
-              value={form.desc}
+              name="description"
+              value={form.description}
               onChange={handleFormChange}
               className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-200"
-              placeholder="e.g. High quality aged basmati rice, 25kg bag"
+              placeholder="e.g. High quality organic rice"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
             <select
-              name="category"
-              value={form.category}
+              name="unit"
+              value={form.unit}
               onChange={handleFormChange}
               className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-200"
               required
             >
-              <option value="">Select category</option>
-              <option value="Grains">Grains</option>
-              <option value="Spices">Spices</option>
-              <option value="Oils">Oils</option>
-              <option value="Pulses">Pulses</option>
-              <option value="Beverages">Beverages</option>
-              <option value="Other">Other</option>
+              <option value="kg">Kilogram (kg)</option>
+              <option value="liter">Liter</option>
+              <option value="packet">Packet</option>
+              <option value="piece">Piece</option>
+              <option value="box">Box</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Price per Unit (₹)</label>
             <input
               type="number"
-              name="price"
-              value={form.price}
+              name="pricePerUnit"
+              value={form.pricePerUnit}
               onChange={handleFormChange}
               className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-200"
-              placeholder="e.g. 2500"
-              min="1"
+              placeholder="e.g. 45.5"
+              min="0"
+              step="0.01"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Type</label>
-            <select
-              name="deliveryType"
-              value={form.deliveryType}
-              onChange={handleFormChange}
-              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-200"
-            >
-              <option value="instant">Instant</option>
-              <option value="scheduled">Scheduled</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Stock (packs available)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Stock Quantity</label>
             <input
               type="number"
-              name="stock"
-              value={form.stock}
+              name="stockQty"
+              value={form.stockQty}
               onChange={handleFormChange}
               className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-200"
-              placeholder="e.g. 50"
-              min="1"
+              placeholder="e.g. 100"
+              min="0"
               required
             />
           </div>
@@ -117,7 +217,7 @@ const AddProductForm = ({
         </form>
         {showToast && showToast.type === "success" && (
           <div className="mt-4 px-4 py-2 rounded text-white font-medium bg-green-500 flex items-center justify-between">
-            <span>Product added successfully!</span>
+            <span>{showToast.message}</span>
             <button
               className="ml-4 bg-white text-green-700 px-3 py-1 rounded font-semibold border border-green-600 hover:bg-green-50 transition"
               onClick={handleOkToast}
@@ -136,4 +236,4 @@ const AddProductForm = ({
   );
 };
 
-export default AddProductForm; 
+export default AddProductForm;

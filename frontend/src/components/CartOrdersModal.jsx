@@ -1,12 +1,74 @@
 import React, { useState } from 'react';
 import { FaTimes, FaShoppingCart, FaClipboardList, FaMinus, FaPlus, FaTrash } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import { orderAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQuantity, onCheckout }) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('cart'); // 'cart' or 'orders'
+  const [loading, setLoading] = useState(false);
 
   const totalPrice = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+  // Handler for placing order
+  const handlePlaceOrder = async () => {
+    if (cartItems.length === 0) return;
+    setLoading(true);
+    
+    try {
+      // Get vendor and supplier information from cart items
+      // For now, we'll use the first item's vendor/supplier info
+      // In a real app, you'd group orders by vendor/supplier
+      const firstItem = cartItems[0];
+      
+      // Generate a valid MongoDB ObjectId format for vendorId if not available
+      // MongoDB ObjectIds are 24-character hex strings
+      const generateObjectId = () => {
+        return '507f1f77bcf86cd799439011'; // Valid demo ObjectId
+      };
+      
+      const vendorId = user?._id || user?.vendorId || firstItem?.vendorId || generateObjectId();
+      const supplierId = firstItem?.supplierId;
+      
+      if (!supplierId) {
+        alert('Missing supplier information. Please try again.');
+        setLoading(false);
+        return;
+      }
+      
+      // Validate that vendorId is a valid ObjectId format (24 hex characters)
+      const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+      const finalVendorId = objectIdRegex.test(vendorId) ? vendorId : generateObjectId();
+      
+      const orderData = {
+        vendorId: finalVendorId,
+        supplierId,
+        items: cartItems.map(item => ({
+          productId: item.id,
+          quantity: item.quantity,
+          unitPrice: item.price
+        })),
+        deliveryType: 'pickup', // You can make this dynamic if needed
+      };
+      
+      const result = await orderAPI.placeOrder(orderData);
+      alert('Order placed successfully!');
+      
+      // Clear cart after successful order
+      if (onCheckout) {
+        onCheckout();
+      }
+      
+      setLoading(false);
+      if (onClose) onClose();
+      
+    } catch (error) {
+      alert('Order failed: ' + error.message);
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col">
@@ -97,11 +159,11 @@ const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQ
                     <div className="text-2xl font-bold text-gray-800">Total:</div>
                     <div className="text-3xl font-extrabold text-green-600">₹{totalPrice}</div>
                     <button
-                      onClick={onCheckout}
+                      onClick={handlePlaceOrder}
                       className="w-full md:w-64 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-md transition disabled:opacity-50"
-                      disabled={cartItems.length === 0}
+                      disabled={cartItems.length === 0 || loading}
                     >
-                      Checkout
+                      {loading ? 'Placing Order...' : 'Place Order'}
                     </button>
                   </div>
                 </div>

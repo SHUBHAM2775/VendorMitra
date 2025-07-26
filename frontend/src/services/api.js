@@ -1,19 +1,19 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = "http://localhost:5000/api";
 
 // Helper function to make API calls
 const apiCall = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   const config = {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...options.headers,
     },
     ...options,
   };
 
   // Add auth token if available
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem("authToken");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -21,11 +21,37 @@ const apiCall = async (endpoint, options = {}) => {
   try {
     const response = await fetch(url, config);
     const data = await response.json();
-    
+
     if (!response.ok) {
-      throw new Error(data.error || 'API request failed');
+      throw new Error(data.error || "API request failed");
     }
-    
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Helper function for public API calls (no auth required)
+const publicApiCall = async (endpoint, options = {}) => {
+  const url = `${API_BASE_URL}${endpoint}`;
+
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+    ...options,
+  };
+
+  try {
+    const response = await fetch(url, config);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "API request failed");
+    }
+
     return data;
   } catch (error) {
     throw error;
@@ -36,23 +62,178 @@ const apiCall = async (endpoint, options = {}) => {
 export const authAPI = {
   // Register a new user
   register: async (userData) => {
-    return apiCall('/auth/register', {
-      method: 'POST',
+    return apiCall("/auth/register", {
+      method: "POST",
       body: JSON.stringify(userData),
     });
   },
 
   // Login user
   login: async (credentials) => {
-    return apiCall('/auth/login', {
-      method: 'POST',
+    return apiCall("/auth/login", {
+      method: "POST",
       body: JSON.stringify(credentials),
     });
   },
 
   // Get current user info
   getCurrentUser: async () => {
-    return apiCall('/auth/me');
+    return apiCall("/auth/me");
+  },
+};
+
+// Product API calls
+export const productAPI = {
+  // Get all products (try with auth first, fallback to public)
+  getProducts: async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      // If user is authenticated, use the authenticated endpoint
+      if (token) {
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+
+        const response = await fetch(
+          "http://localhost:5000/api/prod/get-product",
+          {
+            method: "GET",
+            headers: headers,
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          return data;
+        }
+      }
+
+      // For non-authenticated users or if auth fails, use public endpoint
+      const response = await fetch(
+        "http://localhost:5000/api/prod/public/get-products",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      throw error;
+    }
+  },
+
+  // Get products by supplier ID
+  getProductsBySupplierId: async (supplierId) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`http://localhost:5000/api/prod/supplier/${supplierId}`, {
+        method: 'GET',
+        headers: headers,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching products by supplier:', error);
+      throw error;
+    }
+  },
+};
+
+// Order API calls
+export const orderAPI = {
+  // Place a new order
+  placeOrder: async (orderData) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(
+        "http://localhost:5000/api/orders/place-order",
+        {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify(orderData),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error placing order:", error);
+      throw error;
+    }
+  },
+
+  // Get vendor orders
+  getVendorOrders: async (vendorId) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(
+        `http://localhost:5000/api/orders/vendor/${vendorId}`,
+        {
+          method: "GET",
+          headers: headers,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching vendor orders:", error);
+      throw error;
+    }
   },
 
   getVerifiedSuppliers: async () => {
@@ -64,18 +245,18 @@ export const authAPI = {
 // Token management
 export const tokenManager = {
   setToken: (token) => {
-    localStorage.setItem('authToken', token);
+    localStorage.setItem("authToken", token);
   },
-  
+
   getToken: () => {
-    return localStorage.getItem('authToken');
+    return localStorage.getItem("authToken");
   },
-  
+
   removeToken: () => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem("authToken");
   },
-  
+
   isAuthenticated: () => {
-    return !!localStorage.getItem('authToken');
+    return !!localStorage.getItem("authToken");
   },
-}; 
+};
