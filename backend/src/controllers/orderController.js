@@ -106,3 +106,13 @@ exports.updateOrderStatus = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+exports.getTotalOrderCount = async (req, res) => {
+  try {
+    const count = await Order.countDocuments();
+    res.status(200).json({ totalOrders: count });
+  } catch (error) {
+    console.error("Error getting total order count:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
