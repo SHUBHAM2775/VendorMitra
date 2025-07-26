@@ -496,14 +496,9 @@ const Supplier = () => {
           </div>
         ))}
       </div>
-      {/* Add Product Button and Form below summary cards */}
+      {/* Add Product Form below summary cards */}
       <div className="max-w-2xl mx-auto flex flex-col items-end mt-2 mb-6">
-        <button
-          className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition mb-2"
-          onClick={() => setShowAddForm(true)}
-        >
-          + Add Product
-        </button>
+        {/* Button moved to Products section */}
         {showAddForm && (
           <div className="w-full relative bg-white rounded-lg shadow p-6">
             {/* Cross button */}
@@ -628,7 +623,7 @@ const Supplier = () => {
       {/* Product Catalog and rest of the page */}
 
       {/* Tabs */}
-      <div className="flex justify-center gap-2 px-8">
+      <div className="flex justify-center gap-6 px-8">
         {["Products", "Orders", "Dispatch"].map((t) => (
           <button
             key={t}
@@ -640,13 +635,24 @@ const Supplier = () => {
         ))}
       </div>
 
+      {/* Add Product Button - Outside catalog for Products tab only */}
+      {tab === "Products" && (
+        <div className="flex justify-end px-8 mt-4 mb-4">
+          <button
+            className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition mr-10"
+            onClick={() => setShowAddForm(true)}
+          >
+            + Add Product
+          </button>
+        </div>
+      )}
+
       {/* Tab Content */}
-      <div className="bg-white rounded-b-lg shadow mx-8 mb-8 p-6 mt-0">
+      <div className="bg-white rounded-b-lg shadow mx-8 mb-8 p-6 mt-4">
         {tab === "Products" && (
           <div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Product Catalog</h2>
-              {/* The "+ Add Product" button is now outside the form */}
             </div>
             <table className="w-full text-left">
               <thead>
