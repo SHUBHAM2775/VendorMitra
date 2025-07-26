@@ -54,6 +54,11 @@ export const authAPI = {
   getCurrentUser: async () => {
     return apiCall('/auth/me');
   },
+
+  getVerifiedSuppliers: async () => {
+    return apiCall('/auth/suppliers');
+  },
+
 };
 
 // Token management
