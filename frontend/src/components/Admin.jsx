@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import SummaryCards from "./admin/SummaryCards";
-import TabNavigation from "./admin/TabNavigation";
+import { getPendingVerifications,verifySupplier } from "../services/adminServices";
 import SupplierManagement from "./admin/SupplierManagement";
 import BundleManagement from "./admin/BundleManagement";
 import IssueManagement from "./admin/IssueManagement";
@@ -10,84 +10,66 @@ const Admin = () => {
   const [tab, setTab] = useState("Pending");
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
+  const [pendingSuppliers, setPendingSuppliers] = useState([]);
+const [acceptedSuppliers, setAcceptedSuppliers] = useState([]);
+const [rejectedSuppliers, setRejectedSuppliers] = useState([]);
+
 
   // Split suppliers into pending, accepted, rejected
-  const [pendingSuppliers, setPendingSuppliers] = useState([
-    {
-      id: "SUP001",
-      name: "Fresh Farm Supplies",
-      fssaiLicenseNumber: "12345678901234",
-      submittedDate: "2024-01-15",
-      status: "pending",
-      verificationStatus: "pending",
-      verificationDetails: {
-        businessName: "Fresh Farm Supplies Pvt Ltd",
-        fssaiNumber: "12345678901234",
-        certificateType: "FSSAI",
-        businessAddress: "Shop No. 45, Andheri West, Mumbai - 400058",
-        contactPerson: "Rajesh Kumar",
-        phoneNumber: "+91 98765 43210",
-        email: "freshfarm@email.com",
-        certificateFile: {
-          name: "FSSAI_License_FreshFarm.pdf",
-          url: "#", // In real app, this would be the actual file URL
-          type: "application/pdf"
-        },
-        submittedDate: "2024-01-15"
-      }
-    },
-    {
-      id: "SUP002", 
-      name: "Organic Valley",
-      fssaiLicenseNumber: "98765432109876",
-      submittedDate: "2024-01-14",
-      status: "pending",
-      verificationStatus: "pending",
-      verificationDetails: {
-        businessName: "Organic Valley Foods",
-        fssaiNumber: "98765432109876",
-        certificateType: "FSSAI",
-        businessAddress: "B-12, Koregaon Park, Pune - 411001",
-        contactPerson: "Priya Sharma",
-        phoneNumber: "+91 98765 43211",
-        email: "organicvalley@email.com",
-        certificateFile: {
-          name: "FSSAI_License_OrganicValley.jpg",
-          url: "#", // In real app, this would be the actual file URL
-          type: "image/jpeg"
-        },
-        submittedDate: "2024-01-14"
-      }
+  useEffect(() => {
+  const fetchSuppliers = async () => {
+    try {
+      const suppliers = await getPendingVerifications();
+
+      // Optional: Map suppliers to match existing structure if needed
+      const formattedSuppliers = suppliers.map((s) => ({
+        id: s._id,
+        name: s.name,
+        fssaiLicenseNumber: s.kycDocs?.[0] || "N/A",
+        submittedDate: new Date(s.createdAt).toISOString().split("T")[0],
+        status: s.verificationStatus,
+        verificationStatus: s.verificationStatus,
+        verificationDetails: {
+          businessName: s.name,
+          fssaiNumber: s.kycDocs?.[0] || "",
+          certificateType: "FSSAI",
+          businessAddress: "N/A", // You can extend your schema later to include this
+          contactPerson: s.name,
+          phoneNumber: s.phone || "N/A",
+          email: s.email,
+          certificateFile: {
+            name: s.kycDocs?.[0] || "Document",
+            url: "#", // Replace with actual upload path if stored
+            type: "application/pdf"
+          },
+          submittedDate: new Date(s.createdAt).toISOString().split("T")[0]
+        }
+      }));
+
+      setPendingSuppliers(formattedSuppliers);
+    } catch (err) {
+      console.error("Failed to fetch pending suppliers:", err);
     }
-  ]);
-  const [acceptedSuppliers, setAcceptedSuppliers] = useState([]);
-  const [rejectedSuppliers, setRejectedSuppliers] = useState([
-    {
-      id: "SUP003",
-      name: "Spice Traders Co.",
-      fssaiLicenseNumber: "11223344556677",
-      submittedDate: "2024-01-13",
-      status: "rejected",
-      verificationStatus: "rejected",
-      verificationDetails: {
-        businessName: "Spice Traders Company",
-        fssaiNumber: "11223344556677",
-        certificateType: "FSSAI",
-        businessAddress: "Shop 78, Connaught Place, New Delhi - 110001",
-        contactPerson: "Amit Patel",
-        phoneNumber: "+91 98765 43212",
-        email: "spicetraders@email.com",
-        certificateFile: {
-          name: "FSSAI_License_SpiceTraders.pdf",
-          url: "#",
-          type: "application/pdf"
-        },
-        submittedDate: "2024-01-13",
-        rejectedDate: "2024-01-14",
-        rejectedBy: "Admin"
-      }
-    }
-  ]);
+  };
+
+  fetchSuppliers();
+}, []);
+
+const handleVerify = async (id) => {
+  try {
+    await verifySupplier(id, "verified");
+    toast.success("Supplier verified successfully!");
+
+    // Refresh pending suppliers
+    const updatedSuppliers = pendingSuppliers.filter(supplier => supplier._id !== id);
+    setPendingSuppliers(updatedSuppliers);
+  } catch (error) {
+    console.error("Verification failed:", error);
+    toast.error("Failed to verify supplier.");
+  }
+};
+
+
 
   // Sample data for bundles
   const [bundles, setBundles] = useState([
