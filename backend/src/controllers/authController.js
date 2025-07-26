@@ -81,3 +81,8 @@ exports.login = async (req, res) => {
 exports.getCurrentUser = (req, res) => {
   res.json({ user: req.user });
 };
+
+exports.logout = (req, res) => {
+  // Simply responds to confirm logout — client deletes the token
+  res.status(200).json({ message: "Logged out successfully" });
+};
