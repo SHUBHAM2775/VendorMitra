@@ -132,7 +132,7 @@ const Header = ({ supplierInfo, cartCount = 0, onCartClick }) => {
         {showLogin && <Login onSuccess={handleLoginSuccess} onClose={() => setShowLogin(false)} />}
       </header>
       {/* Supplier extra header content */}
-      {isSupplier && supplierInfo && (
+      {/* {isSupplier && supplierInfo && (
         <div className="bg-white shadow-sm px-8 pb-2 flex items-center justify-between">
           <div className="text-right">
             <div className="text-gray-500 text-sm">Welcome,</div>
@@ -144,7 +144,7 @@ const Header = ({ supplierInfo, cartCount = 0, onCartClick }) => {
             <span className="text-gray-400 text-xs">({supplierInfo.reviews} reviews)</span>
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 };

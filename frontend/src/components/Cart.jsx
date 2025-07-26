@@ -94,7 +94,7 @@ const Cart = ({ items, onClose, onRemoveItem, onUpdateQuantity }) => {
                 Continue Shopping
               </button>
               <button className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition">
-                Checkout
+                Place Order
               </button>
             </div>
           </div>

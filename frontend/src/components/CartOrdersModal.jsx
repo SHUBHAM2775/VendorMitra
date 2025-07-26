@@ -5,8 +5,63 @@ import { useTranslation } from 'react-i18next';
 const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQuantity, onCheckout }) => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('cart'); // 'cart' or 'orders'
+  const [loading, setLoading] = useState(false);
 
   const totalPrice = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+  // Handler for placing order
+  const handlePlaceOrder = async () => {
+    if (cartItems.length === 0) return;
+    setLoading(true);
+    try {
+      const vendorId = cartItems[0]?.vendorId;
+      const supplierId = cartItems[0]?.supplierId;
+      if (!vendorId || !supplierId) {
+        alert('Missing vendor or supplier information.');
+        setLoading(false);
+        return;
+      }
+  
+      const orderData = {
+        vendorId,
+        supplierId,
+        items: cartItems.map(item => ({
+          productId: item.id || item.productId,
+          quantity: item.quantity,
+          unitPrice: item.price
+        })),
+        deliveryType: 'pickup',
+      };
+  
+      const response = await fetch('http://localhost:5000/api/orders/place-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert('Order failed: ' + (errorData.message || response.statusText));
+        setLoading(false);
+        return;
+      }
+  
+      await response.json();
+      alert('Order placed successfully!');
+  
+      // ✅ Switch to My Orders tab
+      setActiveTab('orders');
+  
+      // Optionally clear cart
+      // clearCart(); // if you have a function for this
+  
+      setLoading(false);
+    } catch (error) {
+      alert('Order failed: ' + error.message);
+      setLoading(false);
+    }
+  };
+  
 
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col">
@@ -97,11 +152,11 @@ const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQ
                     <div className="text-2xl font-bold text-gray-800">Total:</div>
                     <div className="text-3xl font-extrabold text-green-600">₹{totalPrice}</div>
                     <button
-                      onClick={onCheckout}
+                      onClick={handlePlaceOrder}
                       className="w-full md:w-64 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-md transition disabled:opacity-50"
-                      disabled={cartItems.length === 0}
+                      disabled={cartItems.length === 0 || loading}
                     >
-                      Checkout
+                      {loading ? 'Placing Order...' : 'Place Order'}
                     </button>
                   </div>
                 </div>

@@ -32,6 +32,32 @@ const apiCall = async (endpoint, options = {}) => {
   }
 };
 
+// Helper function for public API calls (no auth required)
+const publicApiCall = async (endpoint, options = {}) => {
+  const url = `${API_BASE_URL}${endpoint}`;
+  
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+    ...options,
+  };
+
+  try {
+    const response = await fetch(url, config);
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'API request failed');
+    }
+    
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Authentication API calls
 export const authAPI = {
   // Register a new user
@@ -53,6 +79,14 @@ export const authAPI = {
   // Get current user info
   getCurrentUser: async () => {
     return apiCall('/auth/me');
+  },
+};
+
+// Product API calls
+export const productAPI = {
+  // Get all products (no auth required)
+  getProducts: async () => {
+    return publicApiCall('/prod/get-product');
   },
 };
 
