@@ -10,7 +10,7 @@ if (!fs.existsSync(kycPath)) {
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "../uploads/kyc"));
+    cb(null, kycPath); // uploads/kyc
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + Math.floor(Math.random() * 1e9) + path.extname(file.originalname));

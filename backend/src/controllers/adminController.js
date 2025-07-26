@@ -1,0 +1,46 @@
+const User = require("../models/user"); 
+
+// GET /api/admin/pending-verifications
+const getPendingVerifications = async (req, res) => {
+  try {
+    const pendingSuppliers = await User.find({
+      role: "supplier",
+      verificationStatus: "pending",
+    }).select("-password"); // don’t send password back
+
+    res.json({ suppliers: pendingSuppliers });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// PUT /api/admin/verify-supplier/:id
+const verifySupplier = async (req, res) => {
+  try {
+    console.log("verifySupplier", req.body);
+    const { status } = req.body; // "approved" or "rejected"
+
+    if (!["approved", "rejected"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const supplier = await User.findById(req.params.id);
+    if (!supplier || supplier.role !== "supplier") {
+      return res.status(404).json({ message: "Supplier not found" });
+    }
+
+    supplier.verificationStatus = status;
+    supplier.isVerified = status === "approved";
+    supplier.updatedAt = new Date();
+    await supplier.save();
+
+    res.json({ message: `Supplier ${status} successfully` });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+module.exports = {
+  getPendingVerifications,
+  verifySupplier,
+};

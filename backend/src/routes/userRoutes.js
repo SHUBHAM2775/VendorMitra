@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getUserProfile, updateUserProfile, uploadKycDocs, getVerifiedSuppliers } = require('../controllers/userController');
-const authMiddleware = require("../middleware/authMiddleware");
+const {authMiddleware} = require("../middleware/authMiddleware");
 const upload = require('../utils/upload');
 
 // Route: GET /users/:id

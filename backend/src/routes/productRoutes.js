@@ -6,7 +6,7 @@ const {
   updateProduct,
   deleteProduct,
 } = require("../controllers/productController");
-const authMiddleware = require("../middleware/authMiddleware");
+const {authMiddleware} = require("../middleware/authMiddleware");
 
 // Assume auth middleware exists and sets req.user
 router.post("/add-product", authMiddleware, addProduct); // Supplier adds product
