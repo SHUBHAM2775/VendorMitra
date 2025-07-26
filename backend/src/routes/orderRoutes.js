@@ -9,5 +9,9 @@ router.get("/supplier/:supplierId", orderController.getOrdersBySupplier);
 router.put("/:id/status", orderController.updateOrderStatus);
 router.get("/total-orders", orderController.getTotalOrderCount);
 router.get("/pending-orders", orderController.getPendingOrderCount);
+router.get(
+  "/supplier/:supplierId/dispatched",
+  orderController.getDispatchedOrdersForSupplier
+);
 
 module.exports = router;

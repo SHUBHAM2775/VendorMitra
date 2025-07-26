@@ -126,3 +126,23 @@ exports.getPendingOrderCount = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+exports.getDispatchedOrdersForSupplier = async (req, res) => {
+  try {
+    const { supplierId } = req.params;
+
+    if (!supplierId) {
+      return res.status(400).json({ message: "Supplier ID is required" });
+    }
+
+    const orders = await Order.find({
+      supplierId,
+      status: "dispatched",
+    }).sort({ orderedAt: -1 }); // Optional: latest first
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Error fetching dispatched orders:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
