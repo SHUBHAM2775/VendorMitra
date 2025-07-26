@@ -53,35 +53,32 @@ const updateUserProfile = async (req, res) => {
 
 
 
-
-const uploadKYC = async (req, res) => {
+const uploadKycDocs = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.role !== "supplier") {
+      return res.status(403).json({ message: "Only suppliers can upload KYC" });
+    }
 
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: 'No KYC files uploaded' });
+      return res.status(400).json({ message: "No files uploaded" });
     }
 
-    const filePaths = req.files.map(file => file.path); // Local file paths
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $set: { kycDocs: filePaths, updatedAt: new Date() } },
-      { new: true }
-    ).select('-password');
+    const filePaths = req.files.map((file) => `/uploads/kyc/${file.filename}`);
+    user.kycDocs = filePaths;
+    user.isVerified = true;
+    user.updatedAt = new Date();
+    await user.save();
 
-    if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    res.json({
-      message: 'KYC documents uploaded successfully',
-      kycDocs: filePaths
-    });
+    res.json({ message: "KYC uploaded and verified", kycDocs: filePaths });
   } catch (err) {
-    console.error('KYC Upload Error:', err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ error: err.message });
   }
 };
+
+
 
 
 const getVerifiedSuppliers = async (req, res) => {
@@ -94,4 +91,4 @@ const getVerifiedSuppliers = async (req, res) => {
   }
 };
 
-module.exports = { getUserProfile, updateUserProfile, uploadKYC, getVerifiedSuppliers};
+module.exports = { getUserProfile, updateUserProfile, uploadKycDocs, getVerifiedSuppliers};
