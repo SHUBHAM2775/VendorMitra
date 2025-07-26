@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Header from "./components/Header";
-import Cart from "./components/Cart";
+import CartOrdersModal from "./components/CartOrdersModal";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./components/Home.jsx";
 import Supplier from "./components/Supplier.jsx";
@@ -11,6 +11,7 @@ import { AuthProvider } from "./context/AuthContext";
 function App() {
   const [cartItems, setCartItems] = useState([]);
   const [showCart, setShowCart] = useState(false);
+  const [myOrders, setMyOrders] = useState([]);
   const [supplierInfo, setSupplierInfo] = useState({ name: "ABC Supplier", rating: 4.5, reviews: 120 });
 
   const handleAddToCart = (product) => {
@@ -38,6 +39,12 @@ function App() {
     setCartItems(prevItems =>
       prevItems.map(item => item.id === id ? { ...item, quantity: qty } : item)
     );
+  };
+
+  const handleCheckout = () => {
+    if (cartItems.length === 0) return;
+    setMyOrders(prevOrders => [...cartItems, ...prevOrders]);
+    setCartItems([]);
   };
 
   return (
@@ -71,11 +78,13 @@ function App() {
           />
         </Routes>
         {showCart && (
-          <Cart
-            items={cartItems}
+          <CartOrdersModal
+            cartItems={cartItems}
+            myOrders={myOrders}
             onClose={() => setShowCart(false)}
             onRemoveItem={handleRemoveItem}
             onUpdateQuantity={handleUpdateQuantity}
+            onCheckout={handleCheckout}
           />
         )}
       </Router>
