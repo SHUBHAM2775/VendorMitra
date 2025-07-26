@@ -4,6 +4,7 @@ import Cart from "./components/Cart";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./components/Home.jsx";
 import Supplier from "./components/Supplier.jsx";
+import Admin from "./components/Admin";
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
@@ -27,14 +28,22 @@ function App() {
   };
 
   const handleUpdateQuantity = (id, qty) => {
+    if (qty <= 0) {
+      // Remove item if quantity becomes 0 or negative
+      handleRemoveItem(id);
+      return;
+    }
     setCartItems(prevItems =>
-      prevItems
-        .map(item => item.id === id ? { ...item, quantity: Math.max(1, qty) } : item)
+      prevItems.map(item => item.id === id ? { ...item, quantity: qty } : item)
     );
   };
 
   const handleSupplierView = () => {
     window.location.href = "/supplier";
+  };
+
+  const handleAdminView = () => {
+    window.location.href = "/admin";
   };
 
   return (
@@ -43,11 +52,13 @@ function App() {
         cartCount={cartItems.reduce((total, item) => total + item.quantity, 0)}
         onCartClick={() => setShowCart(true)}
         onSupplierView={handleSupplierView}
+        onAdminView={handleAdminView}
         supplierInfo={supplierInfo}
       />
       <Routes>
         <Route path="/" element={<Home onAddToCart={handleAddToCart} />} />
         <Route path="/supplier" element={<Supplier />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
       {showCart && (
         <Cart

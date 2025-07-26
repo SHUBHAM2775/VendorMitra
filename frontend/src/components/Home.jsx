@@ -1,4 +1,6 @@
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
+import { FaCheck } from 'react-icons/fa';
 
 // Demo translation map for product fields
 const productTranslations = {
@@ -82,9 +84,24 @@ const demoProducts = [
 function Home({ onAddToCart }) {
   const { t, i18n } = useTranslation();
   const language = i18n.language;
+  const [addedToCart, setAddedToCart] = useState(null);
+
+  const handleAddToCart = (product) => {
+    onAddToCart(product);
+    setAddedToCart(product.name);
+    setTimeout(() => setAddedToCart(null), 2000);
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen py-10">
+      {/* Success Notification */}
+      {addedToCart && (
+        <div className="fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-bounce">
+          <FaCheck />
+          <span>{translateField(addedToCart, language)} added to cart!</span>
+        </div>
+      )}
+      
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
           {t('featuredProducts') || 'Featured Products'}
@@ -132,7 +149,7 @@ function Home({ onAddToCart }) {
                 <div className="flex items-center gap-2 mt-4">
                   <span className="text-green-700 font-semibold">{item.inStock} {t('inStock')}</span>
                   <button 
-                    onClick={() => onAddToCart && onAddToCart(item)}
+                    onClick={() => handleAddToCart(item)}
                     className="ml-auto bg-green-600 hover:bg-green-700 text-white text-base px-6 py-2 rounded-lg flex items-center gap-2 font-semibold shadow transition duration-150 cursor-pointer"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l1.4-7H6.6M7 13l-1.4 7h10.8L17 13M7 13V5a2 2 0 012-2h6a2 2 0 012 2v8" /></svg>
