@@ -14,6 +14,7 @@ function App() {
   const [showCart, setShowCart] = useState(false);
   const [myOrders, setMyOrders] = useState([]);
   const [supplierInfo, setSupplierInfo] = useState({ name: "ABC Supplier", rating: 4.5, reviews: 120 });
+  const [showOrders, setShowOrders] = useState(false); // New state to control showing orders
 
   const handleAddToCart = (product) => {
     setCartItems(prevItems => {
@@ -46,6 +47,13 @@ function App() {
     if (cartItems.length === 0) return;
     setMyOrders(prevOrders => [...cartItems, ...prevOrders]);
     setCartItems([]);
+  };
+
+  const handleOrderSuccess = () => {
+    // Clear cart and show orders
+    setCartItems([]);
+    setShowOrders(true);
+    setShowCart(true); // Keep cart modal open but switch to orders tab
   };
 
   return (
@@ -83,10 +91,14 @@ function App() {
           <CartOrdersModal
             cartItems={cartItems}
             myOrders={myOrders}
-            onClose={() => setShowCart(false)}
+            onClose={() => {
+              setShowCart(false);
+              setShowOrders(false); // Reset show orders state when closing
+            }}
             onRemoveItem={handleRemoveItem}
             onUpdateQuantity={handleUpdateQuantity}
             onCheckout={handleCheckout}
+            initialTab={showOrders ? 'orders' : 'cart'} // Pass initial tab
           />
         )}
       </Router>

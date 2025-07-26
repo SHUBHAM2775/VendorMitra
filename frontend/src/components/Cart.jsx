@@ -1,12 +1,71 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FaTrash, FaPlus, FaMinus, FaTimes } from 'react-icons/fa';
+import { orderAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
-const Cart = ({ items, onClose, onRemoveItem, onUpdateQuantity }) => {
+const Cart = ({ items, onClose, onRemoveItem, onUpdateQuantity, onOrderSuccess }) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
 
   const totalPrice = items.reduce((total, item) => total + (item.price * item.quantity), 0);
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
+
+  // Handler for placing order
+  const handlePlaceOrder = async () => {
+    if (items.length === 0) return;
+    setLoading(true);
+    
+    try {
+      // Get vendor and supplier information from cart items
+      const firstItem = items[0];
+      
+      // Generate a valid MongoDB ObjectId format for vendorId if not available
+      const generateObjectId = () => {
+        return '507f1f77bcf86cd799439011'; // Valid demo ObjectId
+      };
+      
+      const vendorId = user?._id || user?.vendorId || firstItem?.vendorId || generateObjectId();
+      const supplierId = firstItem?.supplierId;
+      
+      if (!supplierId) {
+        alert('Missing supplier information. Please try again.');
+        setLoading(false);
+        return;
+      }
+      
+      // Validate that vendorId is a valid ObjectId format (24 hex characters)
+      const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+      const finalVendorId = objectIdRegex.test(vendorId) ? vendorId : generateObjectId();
+      
+      const orderData = {
+        vendorId: finalVendorId,
+        supplierId,
+        items: items.map(item => ({
+          productId: item.id,
+          quantity: item.quantity,
+          unitPrice: item.price
+        })),
+        deliveryType: 'pickup', // You can make this dynamic if needed
+      };
+      
+      const result = await orderAPI.placeOrder(orderData);
+      alert('Order placed successfully!');
+      
+      // Call success callback to handle post-order actions
+      if (onOrderSuccess) {
+        onOrderSuccess();
+      }
+      
+      setLoading(false);
+      if (onClose) onClose();
+      
+    } catch (error) {
+      alert('Order failed: ' + error.message);
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -93,8 +152,12 @@ const Cart = ({ items, onClose, onRemoveItem, onUpdateQuantity }) => {
               >
                 Continue Shopping
               </button>
-              <button className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition">
-                Place Order
+              <button 
+                onClick={handlePlaceOrder}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition disabled:opacity-50"
+                disabled={items.length === 0 || loading}
+              >
+                {loading ? 'Placing Order...' : 'Place Order'}
               </button>
             </div>
           </div>
