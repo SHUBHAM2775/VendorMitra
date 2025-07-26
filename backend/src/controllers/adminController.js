@@ -40,7 +40,23 @@ const verifySupplier = async (req, res) => {
   }
 };
 
+const getPendingVerificationCount = async (req, res) => {
+  try {
+    const count = await User.countDocuments({
+      role: "supplier",
+      verificationStatus: "pending"
+    });
+
+    res.json({ count });
+  } catch (error) {
+    console.error("Error fetching pending verification count:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+
 module.exports = {
   getPendingVerifications,
+  getPendingVerificationCount,
   verifySupplier,
 };
