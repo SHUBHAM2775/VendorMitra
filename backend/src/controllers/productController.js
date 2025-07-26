@@ -26,6 +26,9 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
+//get products by id
+
+
 // PUT /products/:id
 exports.updateProduct = async (req, res) => {
   try {

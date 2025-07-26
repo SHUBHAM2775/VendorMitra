@@ -264,6 +264,11 @@ export const orderAPI = {
       throw error;
     }
   },
+
+  getVerifiedSuppliers: async () => {
+    return apiCall('/auth/suppliers');
+  },
+
 };
 
 // Token management
