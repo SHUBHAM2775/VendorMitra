@@ -29,6 +29,10 @@ const verifySupplier = async (req, res) => {
       return res.status(404).json({ message: "Supplier not found" });
     }
 
+     if (status === "approved" && !supplier.fssaiNumber) {
+      return res.status(400).json({ message: "FSSAI number is missing. Cannot approve." });
+    }
+
     supplier.verificationStatus = status;
     supplier.isVerified = status === "approved";
     supplier.updatedAt = new Date();
@@ -54,9 +58,24 @@ const getPendingVerificationCount = async (req, res) => {
   }
 };
 
+const getRejectedVerificationCount = async (req, res) => {
+  try {
+    const count = await User.countDocuments({
+      role: "supplier",
+      verificationStatus: "rejected"
+    });
+
+    res.json({ count });
+  } catch (error) {
+    console.error("Error fetching rejected verification count:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 
 module.exports = {
   getPendingVerifications,
   getPendingVerificationCount,
+  getRejectedVerificationCount,
   verifySupplier,
 };
