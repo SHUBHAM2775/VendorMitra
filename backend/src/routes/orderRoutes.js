@@ -13,5 +13,9 @@ router.get(
   "/supplier/:supplierId/dispatched",
   orderController.getDispatchedOrdersForSupplier
 );
+router.get(
+  "/supplier/:supplierId/pending",
+  orderController.getPendingOrdersForSupplier
+);
 
 module.exports = router;
