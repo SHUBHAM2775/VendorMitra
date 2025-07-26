@@ -11,6 +11,11 @@ const reviewSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true, // or optional if reviews can exist without product
+  },
   rating: {
     type: Number,
     required: true,
@@ -19,7 +24,7 @@ const reviewSchema = new mongoose.Schema({
   },
   comment: {
     type: String,
-    trim: true,
+    default: "",
   },
   createdAt: {
     type: Date,
