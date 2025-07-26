@@ -17,6 +17,7 @@ const ProductCatalog = ({
       <table className="w-full text-left">
         <thead>
           <tr className="text-gray-500 text-sm border-b">
+            <th className="py-2">Image</th>
             <th className="py-2">Product</th>
             <th>Category</th>
             <th>Price</th>
@@ -28,6 +29,19 @@ const ProductCatalog = ({
         <tbody>
           {products.map((p, idx) => (
             <tr key={p.name} className="border-b last:border-b-0">
+              <td className="py-3">
+                {p.image ? (
+                  <img
+                    src={p.image}
+                    alt={p.name}
+                    className="h-12 w-12 object-cover rounded-lg border"
+                  />
+                ) : (
+                  <div className="h-12 w-12 bg-gray-200 rounded-lg border flex items-center justify-center">
+                    <span className="text-gray-400 text-xs">No Image</span>
+                  </div>
+                )}
+              </td>
               <td className="py-3">
                 <div className="font-semibold text-gray-800">{p.name}</div>
                 <div className="text-xs text-gray-500">{p.desc}</div>
