@@ -28,3 +28,22 @@ exports.createReview = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+exports.getReviewsBySupplier = async (req, res) => {
+  try {
+    const { supplierId } = req.params;
+
+    if (!supplierId) {
+      return res.status(400).json({ message: "Supplier ID is required" });
+    }
+
+    const reviews = await Review.find({ supplierId })
+      .populate("vendorId", "name") // Optional: fetch vendor name
+      .sort({ createdAt: -1 }); // Newest first
+
+    res.status(200).json(reviews);
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
