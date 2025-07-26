@@ -2,6 +2,7 @@ import React from "react";
 
 const ProductCatalog = ({
   products,
+  loading,
   editIndex,
   editProduct,
   handleEditClick,
@@ -9,6 +10,31 @@ const ProductCatalog = ({
   handleEditSave,
   handleEditCancel
 }) => {
+  if (loading) {
+    return (
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Product Catalog</h2>
+        </div>
+        <div className="flex justify-center items-center py-10">
+          <div className="text-gray-500">Loading products...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Product Catalog</h2>
+        </div>
+        <div className="flex justify-center items-center py-10">
+          <div className="text-gray-500">No products found. Add your first product to get started!</div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
@@ -28,7 +54,7 @@ const ProductCatalog = ({
         </thead>
         <tbody>
           {products.map((p, idx) => (
-            <tr key={p.name} className="border-b last:border-b-0">
+            <tr key={p._id || p.name || idx} className="border-b last:border-b-0">
               <td className="py-3">
                 {p.image ? (
                   <img
