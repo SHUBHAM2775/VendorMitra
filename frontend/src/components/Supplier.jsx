@@ -194,28 +194,8 @@ const Supplier = () => {
   const handleVerificationSubmit = (e) => {
     e.preventDefault();
     setSubmittingVerification(true);
-
-    // Prepare supplier data in the format expected by Admin.jsx
-    const newSupplier = {
-      id: `SUP${Date.now()}`,
-      name: verificationForm.businessName,
-      fssaiLicenseNumber: verificationForm.fssaiNumber,
-      submittedDate: new Date().toISOString().split('T')[0],
-      status: "pending",
-      verificationStatus: "pending",
-      verificationDetails: {
-        ...verificationForm,
-        certificateFile: verificationForm.certificateFile
-          ? { name: verificationForm.certificateFile.name, url: "#", type: verificationForm.certificateFile.type }
-          : null,
-        submittedDate: new Date().toISOString().split('T')[0],
-      },
-    };
-
-    // Save to localStorage
-    const existing = JSON.parse(localStorage.getItem("pendingSuppliers") || "[]");
-    localStorage.setItem("pendingSuppliers", JSON.stringify([newSupplier, ...existing]));
-
+    
+    // Simulate API call for verification submission
     setTimeout(() => {
       setSubmittingVerification(false);
       setShowVerificationForm(false);

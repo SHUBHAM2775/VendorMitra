@@ -50,7 +50,8 @@ function mapApiProductToFrontend(apiProduct) {
     name: apiProduct.name,
     price: apiProduct.pricePerUnit,
     supplier: apiProduct.supplierId?.name || 'Unknown Supplier',
-    supplierId: apiProduct.supplierId?._id || apiProduct.supplierId, // Include supplier ID
+    supplierId: apiProduct.supplierId?._id || apiProduct.supplierId, // Add supplierId
+    vendorId: apiProduct.vendorId || null, // Add vendorId if available
     rating: 4.2, // Default rating since API doesn't provide this yet
     ratingCount: Math.floor(Math.random() * 200) + 50, // Random count for demo
     image: apiProduct.image || "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80",
@@ -105,6 +106,8 @@ function Home({ onAddToCart }) {
             name: "Chaat Stall Starter",
             price: 700,
             supplier: "Mumbai Fresh Supplies",
+            supplierId: "507f1f77bcf86cd799439011", // Valid ObjectId format
+            vendorId: "507f1f77bcf86cd799439012", // Valid ObjectId format
             rating: 4.2,
             ratingCount: 127,
             image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80",
@@ -113,6 +116,7 @@ function Home({ onAddToCart }) {
             phone: "+91 98765 43210",
             verified: true,
             inStock: 15,
+            unit: "pack",
             translations: {
               en: { name: "Chaat Stall Starter", supplier: "Mumbai Fresh Supplies", address: "Andheri West, Mumbai" },
               hi: { name: "चाट स्टाल स्टार्टर", supplier: "मुंबई फ्रेश सप्लाइज", address: "अंधेरी वेस्ट, मुंबई" }
@@ -123,6 +127,8 @@ function Home({ onAddToCart }) {
             name: "Street Food Combo",
             price: 1200,
             supplier: "Delhi Street Foods",
+            supplierId: "507f1f77bcf86cd799439013", // Valid ObjectId format
+            vendorId: "507f1f77bcf86cd799439012", // Valid ObjectId format
             rating: 4.5,
             ratingCount: 89,
             image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=400&q=80",
@@ -131,6 +137,7 @@ function Home({ onAddToCart }) {
             phone: "+91 98765 43211",
             verified: true,
             inStock: 8,
+            unit: "combo",
             translations: {
               en: { name: "Street Food Combo", supplier: "Delhi Street Foods", address: "Chandni Chowk, Delhi" },
               hi: { name: "स्ट्रीट फूड कॉम्बो", supplier: "दिल्ली स्ट्रीट फूड्स", address: "चांदनी चौक, दिल्ली" }
@@ -141,6 +148,8 @@ function Home({ onAddToCart }) {
             name: "South Indian Breakfast Kit",
             price: 950,
             supplier: "Bangalore Tiffin Center",
+            supplierId: "507f1f77bcf86cd799439014", // Valid ObjectId format
+            vendorId: "507f1f77bcf86cd799439012", // Valid ObjectId format
             rating: 4.7,
             ratingCount: 203,
             image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=400&q=80",
@@ -149,6 +158,7 @@ function Home({ onAddToCart }) {
             phone: "+91 98765 43212",
             verified: true,
             inStock: 12,
+            unit: "kit",
             translations: {
               en: { name: "South Indian Breakfast Kit", supplier: "Bangalore Tiffin Center", address: "Koramangala, Bangalore" },
               hi: { name: "दक्षिण भारतीय नाश्ता किट", supplier: "बैंगलोर टिफिन सेंटर", address: "कोरमंगला, बैंगलोर" }

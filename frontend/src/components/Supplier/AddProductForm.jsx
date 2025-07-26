@@ -5,12 +5,39 @@ const AddProductForm = ({
   setShowAddForm,
   form,
   handleFormChange,
-  handleAddProduct,
   adding,
   showToast,
-  handleOkToast
+  handleOkToast,
+  setShowToast // Ensure this is passed from the parent
 }) => {
   if (!showAddForm) return null;
+
+  const handleAddProduct = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+
+    try {
+      const token = localStorage.getItem("token"); // Replace with your method of getting the token
+
+      const response = await fetch("http://localhost:5000/api/prod/add-product", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
+        },
+        body: JSON.stringify(form), // Send the form data as JSON
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await response.json();
+      setShowToast({ type: "success", message: "Product added successfully!" });
+      // Optionally reset the form or close the modal
+    } catch (error) {
+      setShowToast({ type: "error", message: error.message });
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto flex flex-col items-end mt-2 mb-6">
@@ -117,7 +144,7 @@ const AddProductForm = ({
         </form>
         {showToast && showToast.type === "success" && (
           <div className="mt-4 px-4 py-2 rounded text-white font-medium bg-green-500 flex items-center justify-between">
-            <span>Product added successfully!</span>
+            <span>{showToast.message}</span>
             <button
               className="ml-4 bg-white text-green-700 px-3 py-1 rounded font-semibold border border-green-600 hover:bg-green-50 transition"
               onClick={handleOkToast}
@@ -136,4 +163,4 @@ const AddProductForm = ({
   );
 };
 
-export default AddProductForm; 
+export default AddProductForm;

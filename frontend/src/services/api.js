@@ -84,9 +84,72 @@ export const authAPI = {
 
 // Product API calls
 export const productAPI = {
-  // Get all products (no auth required)
+  // Get all products (try with auth first, fallback to public)
   getProducts: async () => {
-    return publicApiCall('/prod/get-product');
+    try {
+      // First try with authentication if token exists
+      const token = localStorage.getItem('authToken');
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      const response = await fetch('http://localhost:5000/api/prod/get-product', {
+        method: 'GET',
+        headers: headers,
+      });
+      
+      if (!response.ok) {
+        // If 401 and no token, it means auth is required
+        if (response.status === 401 && !token) {
+          throw new Error('Authentication required to fetch products');
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      throw error;
+    }
+  },
+};
+
+// Order API calls
+export const orderAPI = {
+  // Place a new order
+  placeOrder: async (orderData) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      const response = await fetch('http://localhost:5000/api/orders/place-order', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(orderData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error placing order:', error);
+      throw error;
+    }
   },
 };
 

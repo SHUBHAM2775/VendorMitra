@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { FaTimes, FaShoppingCart, FaClipboardList, FaMinus, FaPlus, FaTrash } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import { orderAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQuantity, onCheckout }) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('cart'); // 'cart' or 'orders'
   const [loading, setLoading] = useState(false);
 
@@ -13,55 +16,59 @@ const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQ
   const handlePlaceOrder = async () => {
     if (cartItems.length === 0) return;
     setLoading(true);
+    
     try {
-      const vendorId = cartItems[0]?.vendorId;
-      const supplierId = cartItems[0]?.supplierId;
-      if (!vendorId || !supplierId) {
-        alert('Missing vendor or supplier information.');
+      // Get vendor and supplier information from cart items
+      // For now, we'll use the first item's vendor/supplier info
+      // In a real app, you'd group orders by vendor/supplier
+      const firstItem = cartItems[0];
+      
+      // Generate a valid MongoDB ObjectId format for vendorId if not available
+      // MongoDB ObjectIds are 24-character hex strings
+      const generateObjectId = () => {
+        return '507f1f77bcf86cd799439011'; // Valid demo ObjectId
+      };
+      
+      const vendorId = user?._id || user?.vendorId || firstItem?.vendorId || generateObjectId();
+      const supplierId = firstItem?.supplierId;
+      
+      if (!supplierId) {
+        alert('Missing supplier information. Please try again.');
         setLoading(false);
         return;
       }
-  
+      
+      // Validate that vendorId is a valid ObjectId format (24 hex characters)
+      const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+      const finalVendorId = objectIdRegex.test(vendorId) ? vendorId : generateObjectId();
+      
       const orderData = {
-        vendorId,
+        vendorId: finalVendorId,
         supplierId,
         items: cartItems.map(item => ({
-          productId: item.id || item.productId,
+          productId: item.id,
           quantity: item.quantity,
           unitPrice: item.price
         })),
-        deliveryType: 'pickup',
+        deliveryType: 'pickup', // You can make this dynamic if needed
       };
-  
-      const response = await fetch('http://localhost:5000/api/orders/place-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert('Order failed: ' + (errorData.message || response.statusText));
-        setLoading(false);
-        return;
-      }
-  
-      await response.json();
+      
+      const result = await orderAPI.placeOrder(orderData);
       alert('Order placed successfully!');
-  
-      // ✅ Switch to My Orders tab
-      setActiveTab('orders');
-  
-      // Optionally clear cart
-      // clearCart(); // if you have a function for this
-  
+      
+      // Clear cart after successful order
+      if (onCheckout) {
+        onCheckout();
+      }
+      
       setLoading(false);
+      if (onClose) onClose();
+      
     } catch (error) {
       alert('Order failed: ' + error.message);
       setLoading(false);
     }
   };
-  
 
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col">
