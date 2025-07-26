@@ -116,3 +116,13 @@ exports.getTotalOrderCount = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+exports.getPendingOrderCount = async (req, res) => {
+  try {
+    const count = await Order.countDocuments({ status: "pending" });
+    res.status(200).json({ pendingOrders: count });
+  } catch (error) {
+    console.error("Error getting pending order count:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};

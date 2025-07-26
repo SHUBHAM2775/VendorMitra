@@ -8,5 +8,6 @@ router.get("/vendor/:vendorId", orderController.getOrdersByVendor);
 router.get("/supplier/:supplierId", orderController.getOrdersBySupplier);
 router.put("/:id/status", orderController.updateOrderStatus);
 router.get("/total-orders", orderController.getTotalOrderCount);
+router.get("/pending-orders", orderController.getPendingOrderCount);
 
 module.exports = router;
