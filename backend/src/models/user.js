@@ -26,11 +26,16 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  verificationStatus:{
+  verificationStatus: {
     type: String,
     enum: ["pending", "approved", "rejected"],
     default: "pending",
-  }, 
+  },
+  fssaiNumber: {
+    type: String,
+    trim: true,
+  },
+
   kycDocs: {
     type: [String], // Only for suppliers
     default: [],

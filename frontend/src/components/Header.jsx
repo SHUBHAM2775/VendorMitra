@@ -7,20 +7,32 @@ import {
 } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import Login from "../auth/Login";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const Header = ({ onSupplierView, onAdminView, supplierInfo, cartCount = 0, onCartClick }) => {
+const Header = ({ supplierInfo, cartCount = 0, onCartClick }) => {
   const { t, i18n } = useTranslation();
   const language = i18n.language;
   const [showLogin, setShowLogin] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, isLoading, login, logout } = useAuth();
 
   const handleLoginClick = () => setShowLogin(true);
   const handleLoginSuccess = (userData) => {
     login(userData);
     setShowLogin(false);
+    // Redirect based on role only if not already on the correct page
+    if (userData.role === "vendor") {
+      // Vendors can stay on home page, no need to redirect
+      if (location.pathname !== "/") {
+        navigate("/");
+      }
+    } else if (userData.role === "supplier") {
+      navigate("/supplier");
+    } else if (userData.role === "admin") {
+      navigate("/admin");
+    }
   };
   const handleLogout = () => {
     logout();
@@ -51,7 +63,7 @@ const Header = ({ onSupplierView, onAdminView, supplierInfo, cartCount = 0, onCa
           </div>
         </div>
 
-        {/* Right: Language Toggle, Supplier View, Login/Signup or User Info/Cart */}
+        {/* Right: Language Toggle, Login/Signup or User Info/Cart */}
         <div className="flex items-center gap-4">
           <div className="flex items-center bg-gray-50 border rounded-lg px-2 py-1">
             <FaGlobeAsia className="mr-2 text-gray-500" />
@@ -76,24 +88,6 @@ const Header = ({ onSupplierView, onAdminView, supplierInfo, cartCount = 0, onCa
               हिंदी
             </button>
           </div>
-          {/* Supplier View Button (hide on /supplier and /admin) */}
-          {!isSupplier && !isAdmin && (
-            <button
-              className="border px-4 py-2 rounded-lg shadow-sm hover:bg-green-100 transition text-green-700 font-medium"
-              onClick={onSupplierView}
-            >
-              Supplier View
-            </button>
-          )}
-          {/* Admin View Button (hide on /supplier and /admin) */}
-          {!isSupplier && !isAdmin && (
-            <button
-              className="border px-4 py-2 rounded-lg shadow-sm hover:bg-blue-100 transition text-blue-700 font-medium"
-              onClick={onAdminView}
-            >
-              Admin View
-            </button>
-          )}
           {!user && !isLoading && (
             <button
               className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg"
@@ -110,24 +104,27 @@ const Header = ({ onSupplierView, onAdminView, supplierInfo, cartCount = 0, onCa
               <div className="text-right ml-4">
                 <div className="text-gray-500 text-sm">Welcome</div>
                 <div className="font-medium text-gray-800">{user.name}</div>
-                <div className="text-xs text-gray-500 capitalize">{user.role}</div>
+                {/* <div className="text-xs text-gray-500 capitalize">{user.role}</div> */}
+                
               </div>
-              <button 
-                onClick={onCartClick}
-                className={`flex items-center gap-2 border px-4 py-2 rounded-lg shadow-sm cursor-pointer hover:bg-gray-100 transition ml-4 relative ${
-                  cartCount > 0 ? 'border-green-300 bg-green-50' : ''
-                }`}
-              >
-                <FaShoppingCart className={`text-lg transition-transform ${cartCount > 0 ? 'scale-110' : ''}`} />
-                <span>
-                  {t('cart')} ({cartCount})
-                </span>
-                {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
-                    {cartCount > 99 ? '99+' : cartCount}
+              {user && user.role === 'vendor' && (
+                <button 
+                  onClick={onCartClick}
+                  className={`flex items-center gap-2 border px-4 py-2 rounded-lg shadow-sm cursor-pointer hover:bg-gray-100 transition ml-4 relative ${
+                    cartCount > 0 ? 'border-green-300 bg-green-50' : ''
+                  }`}
+                >
+                  <FaShoppingCart className={`text-lg transition-transform ${cartCount > 0 ? 'scale-110' : ''}`} />
+                  <span>
+                    {t('cart')} ({cartCount})
                   </span>
-                )}
-              </button>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
+                      {cartCount > 99 ? '99+' : cartCount}
+                    </span>
+                  )}
+                </button>
+              )}
               <button className="ml-4 text-sm text-red-600 hover:underline cursor-pointer" onClick={handleLogout}>Logout</button>
             </>
           )}

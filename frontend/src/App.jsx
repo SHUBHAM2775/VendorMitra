@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./components/Home.jsx";
 import Supplier from "./components/Supplier.jsx";
 import Admin from "./components/Admin";
+import RoleRoute from "./components/RoleRoute.jsx";
 import { AuthProvider } from "./context/AuthContext";
 
 function App() {
@@ -39,28 +40,35 @@ function App() {
     );
   };
 
-  const handleSupplierView = () => {
-    window.location.href = "/supplier";
-  };
-
-  const handleAdminView = () => {
-    window.location.href = "/admin";
-  };
-
   return (
     <AuthProvider>
       <Router>
         <Header
           cartCount={cartItems.reduce((total, item) => total + item.quantity, 0)}
           onCartClick={() => setShowCart(true)}
-          onSupplierView={handleSupplierView}
-          onAdminView={handleAdminView}
           supplierInfo={supplierInfo}
         />
         <Routes>
-          <Route path="/" element={<Home onAddToCart={handleAddToCart} />} />
-          <Route path="/supplier" element={<Supplier />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route 
+            path="/" 
+            element={<Home onAddToCart={handleAddToCart} />}
+          />
+          <Route 
+            path="/supplier" 
+            element={
+              <RoleRoute allowedRoles={['supplier']}>
+                <Supplier />
+              </RoleRoute>
+            } 
+          />
+          <Route 
+            path="/admin" 
+            element={
+              <RoleRoute allowedRoles={['admin']}>
+                <Admin />
+              </RoleRoute>
+            } 
+          />
         </Routes>
         {showCart && (
           <Cart
