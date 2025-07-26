@@ -76,3 +76,20 @@ exports.getProductById = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+exports.getProductsBySupplierId = async (req, res) => {
+  try {
+    const { supplierId } = req.params;
+
+    if (!supplierId) {
+      return res.status(400).json({ message: "Supplier ID is required" });
+    }
+
+    const products = await Product.find({ supplierId });
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("Error fetching products by supplier ID:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
