@@ -7,6 +7,7 @@ import Supplier from "./components/Supplier.jsx";
 import Admin from "./components/Admin";
 import RoleRoute from "./components/RoleRoute.jsx";
 import { AuthProvider } from "./context/AuthContext";
+import LanguageSwitcher from './components/languageSwitcher';
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
@@ -55,6 +56,11 @@ function App() {
           onCartClick={() => setShowCart(true)}
           supplierInfo={supplierInfo}
         />
+
+
+        <div style={{ textAlign: "right", margin: "10px 20px" }}>
+          <LanguageSwitcher />
+        </div>
         <Routes>
           <Route 
             path="/" 

@@ -93,7 +93,7 @@ const Header = ({ supplierInfo, cartCount = 0, onCartClick }) => {
               className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg"
               onClick={handleLoginClick}
             >
-              Login / Signup
+              {t('loginSignup')}
             </button>
           )}
           {isLoading && (
