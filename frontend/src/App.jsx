@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./components/Home.jsx";
 import Supplier from "./components/Supplier.jsx";
 import Admin from "./components/Admin";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
@@ -47,28 +48,30 @@ function App() {
   };
 
   return (
-    <Router>
-      <Header
-        cartCount={cartItems.reduce((total, item) => total + item.quantity, 0)}
-        onCartClick={() => setShowCart(true)}
-        onSupplierView={handleSupplierView}
-        onAdminView={handleAdminView}
-        supplierInfo={supplierInfo}
-      />
-      <Routes>
-        <Route path="/" element={<Home onAddToCart={handleAddToCart} />} />
-        <Route path="/supplier" element={<Supplier />} />
-        <Route path="/admin" element={<Admin />} />
-      </Routes>
-      {showCart && (
-        <Cart
-          items={cartItems}
-          onClose={() => setShowCart(false)}
-          onRemoveItem={handleRemoveItem}
-          onUpdateQuantity={handleUpdateQuantity}
+    <AuthProvider>
+      <Router>
+        <Header
+          cartCount={cartItems.reduce((total, item) => total + item.quantity, 0)}
+          onCartClick={() => setShowCart(true)}
+          onSupplierView={handleSupplierView}
+          onAdminView={handleAdminView}
+          supplierInfo={supplierInfo}
         />
-      )}
-    </Router>
+        <Routes>
+          <Route path="/" element={<Home onAddToCart={handleAddToCart} />} />
+          <Route path="/supplier" element={<Supplier />} />
+          <Route path="/admin" element={<Admin />} />
+        </Routes>
+        {showCart && (
+          <Cart
+            items={cartItems}
+            onClose={() => setShowCart(false)}
+            onRemoveItem={handleRemoveItem}
+            onUpdateQuantity={handleUpdateQuantity}
+          />
+        )}
+      </Router>
+    </AuthProvider>
   );
 }
 

@@ -8,20 +8,23 @@ import {
 import { useTranslation } from "react-i18next";
 import Login from "../auth/Login";
 import { useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Header = ({ onSupplierView, onAdminView, supplierInfo, cartCount = 0, onCartClick }) => {
   const { t, i18n } = useTranslation();
   const language = i18n.language;
   const [showLogin, setShowLogin] = useState(false);
-  const [user, setUser] = useState(null);
   const location = useLocation();
+  const { user, isLoading, login, logout } = useAuth();
 
   const handleLoginClick = () => setShowLogin(true);
-  const handleLoginSuccess = (username) => {
-    setUser({ username });
+  const handleLoginSuccess = (userData) => {
+    login(userData);
     setShowLogin(false);
   };
-  const handleLogout = () => setUser(null);
+  const handleLogout = () => {
+    logout();
+  };
 
   // Detect if on /supplier route
   const isSupplier = location.pathname === "/supplier";
@@ -91,7 +94,7 @@ const Header = ({ onSupplierView, onAdminView, supplierInfo, cartCount = 0, onCa
               Admin View
             </button>
           )}
-          {!user && (
+          {!user && !isLoading && (
             <button
               className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg"
               onClick={handleLoginClick}
@@ -99,11 +102,15 @@ const Header = ({ onSupplierView, onAdminView, supplierInfo, cartCount = 0, onCa
               Login / Signup
             </button>
           )}
+          {isLoading && (
+            <div className="text-gray-500 text-sm">Loading...</div>
+          )}
           {user && (
             <>
               <div className="text-right ml-4">
                 <div className="text-gray-500 text-sm">Welcome</div>
-                <div className="font-medium text-gray-800">{user.username}</div>
+                <div className="font-medium text-gray-800">{user.name}</div>
+                <div className="text-xs text-gray-500 capitalize">{user.role}</div>
               </div>
               <button 
                 onClick={onCartClick}
