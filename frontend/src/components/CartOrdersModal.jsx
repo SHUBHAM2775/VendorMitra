@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaTimes, FaShoppingCart, FaClipboardList, FaMinus, FaPlus, FaTrash } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { orderAPI } from '../services/api';
@@ -9,8 +9,30 @@ const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQ
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('cart'); // 'cart' or 'orders'
   const [loading, setLoading] = useState(false);
+  const [userOrders, setUserOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   const totalPrice = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+  // Fetch user orders when orders tab is active
+  useEffect(() => {
+    const fetchUserOrders = async () => {
+      if (activeTab === 'orders' && user?._id) {
+        setOrdersLoading(true);
+        try {
+          const orders = await orderAPI.getVendorOrders(user._id);
+          setUserOrders(orders);
+        } catch (error) {
+          console.error('Error fetching user orders:', error);
+          setUserOrders([]);
+        } finally {
+          setOrdersLoading(false);
+        }
+      }
+    };
+
+    fetchUserOrders();
+  }, [activeTab, user?._id]);
 
   // Handler for placing order
   const handlePlaceOrder = async () => {
@@ -61,8 +83,20 @@ const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQ
         onCheckout();
       }
       
+      // Automatically switch to My Orders tab and refresh orders
+      setActiveTab('orders');
+      
       setLoading(false);
-      if (onClose) onClose();
+      
+      // Refresh orders after successful placement
+      if (user?._id) {
+        try {
+          const orders = await orderAPI.getVendorOrders(user._id);
+          setUserOrders(orders);
+        } catch (error) {
+          console.error('Error refreshing orders:', error);
+        }
+      }
       
     } catch (error) {
       alert('Order failed: ' + error.message);
@@ -174,7 +208,12 @@ const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQ
         {activeTab === 'orders' && (
           <div className="w-full mx-auto">
             <h2 className="text-3xl font-extrabold mb-8 text-green-700 flex items-center gap-3"><FaClipboardList className="text-2xl" /> My Orders</h2>
-            {myOrders.length === 0 ? (
+            {ordersLoading ? (
+              <div className="p-12 text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading your orders...</p>
+              </div>
+            ) : userOrders.length === 0 ? (
               <div className="p-12 text-center">
                 <div className="text-gray-400 text-7xl mb-6">📦</div>
                 <h3 className="text-2xl font-semibold text-gray-600 mb-2">No orders yet</h3>
@@ -182,19 +221,66 @@ const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQ
               </div>
             ) : (
               <div className="space-y-6">
-                {myOrders.map((item, idx) => (
-                  <div key={item.id + '-' + idx} className="flex flex-col md:flex-row items-center gap-6 p-6 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-32 h-32 object-cover rounded-xl border"
-                    />
-                    <div className="flex-1 w-full flex flex-col md:flex-row md:items-center gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xl font-bold text-gray-900 truncate">{item.name}</div>
-                        <div className="text-sm text-gray-500 truncate">{item.supplier}</div>
-                        <div className="text-lg font-bold text-green-600 mt-2">₹{item.price}</div>
-                        <div className="text-xs text-gray-400 mt-1">Qty: {item.quantity}</div>
+                {userOrders.map((order, idx) => (
+                  <div key={order._id} className="bg-gray-50 border border-gray-200 rounded-2xl shadow-sm p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-800">Order #{order._id.slice(-8)}</h3>
+                        <p className="text-sm text-gray-500">
+                          Placed on: {new Date(order.orderedAt).toLocaleDateString('en-IN', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-green-600">₹{order.totalPrice}</div>
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          order.status === 'accepted' ? 'bg-blue-100 text-blue-800' :
+                          order.status === 'dispatched' ? 'bg-purple-100 text-purple-800' :
+                          order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                          order.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t pt-4">
+                      <h4 className="font-semibold text-gray-700 mb-3">Order Items:</h4>
+                      <div className="space-y-2">
+                        {order.items.map((item, itemIdx) => (
+                          <div key={itemIdx} className="flex items-center justify-between bg-white p-3 rounded-lg">
+                            <div>
+                              <div className="font-medium text-gray-800">Product ID: {item.productId}</div>
+                              <div className="text-sm text-gray-600">Quantity: {item.quantity}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-semibold text-gray-800">₹{item.unitPrice}</div>
+                              <div className="text-sm text-gray-500">Unit Price</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="border-t pt-4 mt-4">
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-600">Delivery Type: </span>
+                          <span className="font-medium capitalize">{order.deliveryType}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Last Updated: </span>
+                          <span className="font-medium">
+                            {new Date(order.updatedAt).toLocaleDateString('en-IN')}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
