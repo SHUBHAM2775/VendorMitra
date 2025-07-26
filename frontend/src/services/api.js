@@ -265,6 +265,77 @@ export const orderAPI = {
     }
   },
 
+  // Get supplier orders
+  getSupplierOrders: async (supplierId) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(
+        `http://localhost:5000/api/orders/supplier/${supplierId}`,
+        {
+          method: "GET",
+          headers: headers,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching supplier orders:", error);
+      throw error;
+    }
+  },
+
+  // Update order status
+  updateOrderStatus: async (orderId, status) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(
+        `http://localhost:5000/api/orders/${orderId}/status`,
+        {
+          method: "PUT",
+          headers: headers,
+          body: JSON.stringify({ status }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      throw error;
+    }
+  },
+
   getVerifiedSuppliers: async () => {
     return apiCall('/auth/suppliers');
   },

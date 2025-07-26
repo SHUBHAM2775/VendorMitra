@@ -8,7 +8,7 @@ import OrderManagement from "./Supplier/OrderManagement";
 import DispatchManagement from "./Supplier/DispatchManagement";
 import Toast from "./Supplier/Toast";
 import { useAuth } from "../context/AuthContext";
-import { tokenManager, productAPI } from "../services/api";
+import { tokenManager, productAPI, orderAPI } from "../services/api";
 
 const Supplier = () => {
   const { user, logout } = useAuth();
@@ -96,33 +96,67 @@ const Supplier = () => {
   const [submittingVerification, setSubmittingVerification] = useState(false);
 
   // Dynamic orders state
-  const [orders, setOrders] = useState([
-    {
-      id: "ORD001",
-      customer: "Raj Kumar",
-      phone: "+91 98765 43210",
-      address: "Shop 123, Andheri West, Mumbai",
-      orderDate: "2024-01-15",
-      items: [
-        { name: "Premium Basmati Rice", quantity: 2, price: 5000 },
-        { name: "Organic Turmeric Powder", quantity: 1, price: 450 }
-      ],
-      total: 5450,
-      status: "pending"
-    },
-    {
-      id: "ORD002",
-      customer: "Priya Sharma",
-      phone: "+91 98765 43211",
-      address: "B-45, Connaught Place, New Delhi",
-      orderDate: "2024-01-14",
-      items: [
-        { name: "Premium Basmati Rice", quantity: 1, price: 2500 }
-      ],
-      total: 2500,
-      status: "accepted"
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+
+  // Function to fetch orders from API
+  const fetchOrders = async () => {
+    try {
+      setOrdersLoading(true);
+      
+      // Use the hardcoded supplier ID from the user request
+      const supplierId = user?.id || "6883e0a1a968e706de13e93d";
+      
+      const ordersData = await orderAPI.getSupplierOrders(supplierId);
+      
+      // Fetch product details for each order item
+      const ordersWithProductDetails = await Promise.all(
+        ordersData.map(async (order) => {
+          const itemsWithProductDetails = await Promise.all(
+            order.items.map(async (item) => {
+              try {
+                const productDetails = await productAPI.getProductById(item.productId);
+                return {
+                  ...item,
+                  productName: productDetails.name,
+                  productDescription: productDetails.description,
+                  productImage: productDetails.image
+                };
+              } catch (error) {
+                console.error(`Error fetching product details for ${item.productId}:`, error);
+                return {
+                  ...item,
+                  productName: "Product name unavailable",
+                  productDescription: "Product details unavailable",
+                  productImage: null
+                };
+              }
+            })
+          );
+          
+          return {
+            ...order,
+            items: itemsWithProductDetails
+          };
+        })
+      );
+      
+      setOrders(ordersWithProductDetails);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      setShowToast({ type: "error", message: "Failed to load orders" });
+      setOrders([]);
+    } finally {
+      setOrdersLoading(false);
     }
-  ]);
+  };
+
+  // Fetch orders when component mounts or user changes
+  useEffect(() => {
+    if (user?.id || user?.role === 'supplier') {
+      fetchOrders();
+    }
+  }, [user?.id]);
 
   const handleEditClick = (idx) => {
     const product = products[idx];
@@ -294,22 +328,43 @@ const Supplier = () => {
     }
   };
 
-  const handleAcceptOrder = (orderId) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId ? { ...order, status: "accepted" } : order
-    ));
+  const handleAcceptOrder = async (orderId) => {
+    try {
+      await orderAPI.updateOrderStatus(orderId, "accepted");
+      setOrders(prev => prev.map(order => 
+        order._id === orderId ? { ...order, status: "accepted" } : order
+      ));
+      setShowToast({ type: "success", message: "Order accepted successfully!" });
+    } catch (error) {
+      console.error('Error accepting order:', error);
+      setShowToast({ type: "error", message: "Failed to accept order" });
+    }
   };
 
-  const handleRejectOrder = (orderId) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId ? { ...order, status: "rejected" } : order
-    ));
+  const handleRejectOrder = async (orderId) => {
+    try {
+      await orderAPI.updateOrderStatus(orderId, "rejected");
+      setOrders(prev => prev.map(order => 
+        order._id === orderId ? { ...order, status: "rejected" } : order
+      ));
+      setShowToast({ type: "success", message: "Order rejected successfully!" });
+    } catch (error) {
+      console.error('Error rejecting order:', error);
+      setShowToast({ type: "error", message: "Failed to reject order" });
+    }
   };
 
-  const handleMarkDispatched = (orderId) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId ? { ...order, status: "dispatched" } : order
-    ));
+  const handleMarkDispatched = async (orderId) => {
+    try {
+      await orderAPI.updateOrderStatus(orderId, "dispatched");
+      setOrders(prev => prev.map(order => 
+        order._id === orderId ? { ...order, status: "dispatched" } : order
+      ));
+      setShowToast({ type: "success", message: "Order marked as dispatched!" });
+    } catch (error) {
+      console.error('Error marking order as dispatched:', error);
+      setShowToast({ type: "error", message: "Failed to mark order as dispatched" });
+    }
   };
 
   const handleOkToast = () => {
@@ -422,6 +477,7 @@ const Supplier = () => {
             {tab === "Orders" && (
               <OrderManagement
                 orders={orders}
+                ordersLoading={ordersLoading}
                 handleAcceptOrder={handleAcceptOrder}
                 handleRejectOrder={handleRejectOrder}
               />
