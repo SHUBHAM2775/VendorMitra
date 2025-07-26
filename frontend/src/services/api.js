@@ -87,26 +87,35 @@ export const productAPI = {
   // Get all products (try with auth first, fallback to public)
   getProducts: async () => {
     try {
-      // First try with authentication if token exists
       const token = localStorage.getItem('authToken');
-      const headers = {
-        'Content-Type': 'application/json',
-      };
       
+      // If user is authenticated, use the authenticated endpoint
       if (token) {
-        headers.Authorization = `Bearer ${token}`;
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        };
+        
+        const response = await fetch('http://localhost:5000/api/prod/get-product', {
+          method: 'GET',
+          headers: headers,
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          return data;
+        }
       }
       
-      const response = await fetch('http://localhost:5000/api/prod/get-product', {
+      // For non-authenticated users or if auth fails, use public endpoint
+      const response = await fetch('http://localhost:5000/api/prod/public/get-products', {
         method: 'GET',
-        headers: headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
       
       if (!response.ok) {
-        // If 401 and no token, it means auth is required
-        if (response.status === 401 && !token) {
-          throw new Error('Authentication required to fetch products');
-        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
@@ -148,6 +157,36 @@ export const orderAPI = {
       return data;
     } catch (error) {
       console.error('Error placing order:', error);
+      throw error;
+    }
+  },
+
+  // Get vendor orders
+  getVendorOrders: async (vendorId) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`http://localhost:5000/api/orders/vendor/${vendorId}`, {
+        method: 'GET',
+        headers: headers,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching vendor orders:', error);
       throw error;
     }
   },
