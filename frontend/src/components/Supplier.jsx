@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import VerificationStatus from "./supplier/VerificationStatus";
 import SummaryCards from "./Supplier/SummaryCards";
 import AddProductForm from "./Supplier/AddProductForm";
@@ -8,33 +8,13 @@ import OrderManagement from "./Supplier/OrderManagement";
 import DispatchManagement from "./Supplier/DispatchManagement";
 import Toast from "./Supplier/Toast";
 import { useAuth } from "../context/AuthContext";
-import { tokenManager } from "../services/api";
-
-const initialProducts = [
-  {
-    name: "Premium Basmati Rice",
-    desc: "High quality aged basmati rice, 25kg bag",
-    category: "Grains",
-    price: "₹2500",
-    stock: 50,
-    status: "available",
-    image: "", // Add image field for consistency
-  },
-  {
-    name: "Organic Turmeric Powder",
-    desc: "Pure organic turmeric powder, 1kg pack",
-    category: "Spices",
-    price: "₹450",
-    stock: 30,
-    status: "available",
-    image: "", // Add image field for consistency
-  },
-];
+import { tokenManager, productAPI } from "../services/api";
 
 const Supplier = () => {
   const { user, logout } = useAuth();
   const [tab, setTab] = useState("Products");
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [editIndex, setEditIndex] = useState(null);
   const [editProduct, setEditProduct] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -49,6 +29,55 @@ const Supplier = () => {
     supplierId: user?.id || "SUPPLIER_ID_PLACEHOLDER" // Use actual user ID from auth context
   });
   const [adding, setAdding] = useState(false);
+
+  // Function to map API product data to component format
+  const mapApiProductToComponent = (apiProduct) => {
+    return {
+      _id: apiProduct._id,
+      name: apiProduct.name,
+      desc: apiProduct.description,
+      category: "General", // Default category since API doesn't have this field
+      price: `₹${apiProduct.pricePerUnit}`,
+      stock: apiProduct.stockQty,
+      status: apiProduct.isActive ? "available" : "unavailable",
+      image: apiProduct.image || "",
+      unit: apiProduct.unit,
+      pricePerUnit: apiProduct.pricePerUnit,
+      stockQty: apiProduct.stockQty,
+      supplierId: apiProduct.supplierId
+    };
+  };
+
+  // Function to fetch products from API
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      let response;
+      
+      // If user is logged in, get their specific products
+      if (user?.id) {
+        response = await productAPI.getProductsBySupplierId(user.id);
+      } else {
+        // Fallback to all products if no user
+        response = await productAPI.getProducts();
+      }
+      
+      const mappedProducts = response.map(mapApiProductToComponent);
+      setProducts(mappedProducts);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setShowToast({ type: "error", message: "Failed to load products" });
+      // Keep empty array if error
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch products when component mounts or user changes
+  useEffect(() => {
+    fetchProducts();
+  }, [user?.id]);
 
   // Verification states
   const [isVerified, setIsVerified] = useState(false);
@@ -96,9 +125,17 @@ const Supplier = () => {
   ]);
 
   const handleEditClick = (idx) => {
-    const { category, price, stock, status } = products[idx];
+    const product = products[idx];
     setEditIndex(idx);
-    setEditProduct({ category, price, stock, status });
+    setEditProduct({ 
+      category: product.category || "General",
+      price: product.price,
+      stock: product.stock,
+      status: product.status,
+      desc: product.desc,
+      pricePerUnit: product.pricePerUnit,
+      stockQty: product.stockQty
+    });
   };
 
   const handleEditChange = (e) => {
@@ -106,14 +143,50 @@ const Supplier = () => {
     setEditProduct((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleEditSave = () => {
-    setProducts((prev) =>
-      prev.map((p, idx) =>
-        idx === editIndex ? { ...p, ...editProduct } : p
-      )
-    );
-    setEditIndex(null);
-    setEditProduct(null);
+  const handleEditSave = async () => {
+    try {
+      const token = tokenManager.getToken();
+      const productToUpdate = products[editIndex];
+      
+      if (!token) {
+        setShowToast({ type: "error", message: "Please log in to edit products." });
+        return;
+      }
+
+      // Prepare update data - map UI fields back to API format
+      const updateData = {
+        description: editProduct.desc || productToUpdate.desc,
+        pricePerUnit: parseFloat(editProduct.price?.replace('₹', '') || editProduct.pricePerUnit || productToUpdate.pricePerUnit),
+        stockQty: parseInt(editProduct.stock || editProduct.stockQty || productToUpdate.stockQty),
+        isActive: editProduct.status === "available"
+      };
+
+      const response = await fetch(`http://localhost:5000/api/prod/update-product/${productToUpdate._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        setShowToast({ type: "error", message: errorData.error || "Failed to update product" });
+        return;
+      }
+
+      // Refresh the product list to get updated data
+      await fetchProducts();
+      
+      setEditIndex(null);
+      setEditProduct(null);
+      setShowToast({ type: "success", message: "Product updated successfully!" });
+      
+    } catch (error) {
+      console.error("Error updating product:", error);
+      setShowToast({ type: "error", message: "Failed to update product" });
+    }
   };
 
   const handleEditCancel = () => {
@@ -195,21 +268,8 @@ const Supplier = () => {
 
       const data = await response.json();
       
-      // Add to local products list for immediate UI update
-      setProducts((prev) => [
-        {
-          name: form.name,
-          desc: form.description, // Map to display format
-          category: "General", // Default category for display
-          price: `₹${form.pricePerUnit}`, // Format price for display
-          stock: form.stockQty,
-          status: "available",
-          unit: form.unit,
-          image: form.image, // Include image in the product
-          supplierId: form.supplierId
-        },
-        ...prev
-      ]);
+      // Refresh the product list from the server to get the latest data
+      await fetchProducts();
       
       setShowToast({ type: "success", message: "Product added successfully!" });
       setForm({
@@ -350,6 +410,7 @@ const Supplier = () => {
             {tab === "Products" && (
               <ProductCatalog
                 products={products}
+                loading={loading}
                 editIndex={editIndex}
                 editProduct={editProduct}
                 handleEditClick={handleEditClick}
