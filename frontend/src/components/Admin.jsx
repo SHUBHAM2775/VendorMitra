@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SummaryCards from "./admin/SummaryCards";
 import TabNavigation from "./admin/TabNavigation";
 import SupplierManagement from "./admin/SupplierManagement";
@@ -156,6 +156,16 @@ const Admin = () => {
       submittedDate: "2024-01-13"
     }
   ]);
+
+  useEffect(() => {
+    const localPending = JSON.parse(localStorage.getItem("pendingSuppliers") || "[]");
+    setPendingSuppliers(prev => {
+      // Only add suppliers that are not already present (by id)
+      const existingIds = new Set(prev.map(s => s.id));
+      const newOnes = localPending.filter(s => !existingIds.has(s.id));
+      return [...newOnes, ...prev];
+    });
+  }, []);
 
   // Handlers for supplier approval
   const handleApproveSupplier = (supplierId) => {
