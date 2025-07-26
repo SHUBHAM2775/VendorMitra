@@ -1,9 +1,12 @@
 import React, { useState } from "react";
+import { authAPI, tokenManager } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
-const roles = ["Vendor", "Supplier", "Admin"];
+const roles = ["vendor", "supplier", "admin"];
 
 const Login = ({ onSuccess, onClose }) => {
   const [isSignup, setIsSignup] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   // Login fields
   const [loginId, setLoginId] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -14,25 +17,63 @@ const Login = ({ onSuccess, onClose }) => {
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState(roles[0]);
   const [error, setError] = useState("");
+  const { login } = useAuth();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!loginId || !loginPassword) {
-      setError("Please enter email/username and password");
+      setError("Please enter email and password");
       return;
     }
-    // Simulate successful login
-    onSuccess(loginId);
+    
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      const response = await authAPI.login({
+        email: loginId,
+        password: loginPassword,
+      });
+      
+      // Store token and user info
+      tokenManager.setToken(response.token);
+      login(response.user);
+      onSuccess(response.user);
+    } catch (err) {
+      setError(err.message || "Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     if (!name || !email || !signupPassword || !phone || !role) {
       setError("Please fill all fields");
       return;
     }
-    // Simulate successful signup
-    onSuccess(name);
+    
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      const response = await authAPI.register({
+        name,
+        email,
+        password: signupPassword,
+        phone,
+        role,
+      });
+      
+      // Store token and user info
+      tokenManager.setToken(response.token);
+      login(response.user);
+      onSuccess(response.user);
+    } catch (err) {
+      setError(err.message || "Signup failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -102,9 +143,10 @@ const Login = ({ onSuccess, onClose }) => {
               {error && <div className="text-red-500 text-sm text-center">{error}</div>}
               <button
                 type="submit"
-                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg mt-2 shadow-md transition-all"
+                disabled={isLoading}
+                className={`bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg mt-2 shadow-md transition-all ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                Signup
+                {isLoading ? 'Signing up...' : 'Signup'}
               </button>
             </form>
           </>
@@ -129,9 +171,10 @@ const Login = ({ onSuccess, onClose }) => {
               {error && <div className="text-red-500 text-sm text-center">{error}</div>}
               <button
                 type="submit"
-                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg mt-2 shadow-md transition-all"
+                disabled={isLoading}
+                className={`bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg mt-2 shadow-md transition-all ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                Login
+                {isLoading ? 'Logging in...' : 'Login'}
               </button>
             </form>
           </>
