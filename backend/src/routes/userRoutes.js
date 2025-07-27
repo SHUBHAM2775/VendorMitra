@@ -28,10 +28,6 @@ router.get("/suppliers", authMiddleware, getVerifiedSuppliers);
 
 router.get(
   "/verification-status/:id",
-  (req, res, next) => {
-    console.log("✅ verification-status route hit:", req.params.id);
-    next();
-  },
   getVerificationStatusById
 );
 
