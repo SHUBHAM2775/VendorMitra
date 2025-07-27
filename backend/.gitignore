@@ -8,3 +8,5 @@ node_modules/
 # Optional OS/filesystem junk
 .DS_Store
 Thumbs.db
+
+src/uploads/kyc
