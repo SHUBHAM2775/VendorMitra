@@ -178,13 +178,16 @@ const Admin = () => {
             handleApproveSupplier={handleApproveSupplier}
           />
         )}
+
         {tab === "Accepted" && (
           <SupplierManagement
             pendingSuppliers={acceptedSuppliers}
             handleRejectSupplier={() => {}}
             handleApproveSupplier={() => {}}
+            statusFilter="accepted"
           />
         )}
+        
         {tab === "Rejected" && (
           <SupplierManagement
             pendingSuppliers={rejectedSuppliers}
