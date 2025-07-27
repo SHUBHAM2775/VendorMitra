@@ -81,29 +81,29 @@ const Header = ({ supplierInfo, cartCount = 0, onCartClick }) => {
 
   return (
     <>
-      <header className="bg-white shadow-md py-3 px-8 flex items-center justify-between">
+      <header className="bg-white shadow-md py-3 px-4 sm:px-6 md:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
         {/* Left: Logo and App Name */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto justify-between sm:justify-start">
           <span className="text-3xl flex-shrink-0">
             <span role="img" aria-label="logo">🌱</span>
           </span>
           <div className="min-w-0">
-            <div className="text-2xl font-bold text-green-600 flex items-center gap-2 whitespace-nowrap overflow-hidden text-ellipsis">
+            <div className="text-xl sm:text-2xl font-bold text-green-600 flex items-center gap-2 whitespace-nowrap overflow-hidden text-ellipsis">
               {t('title')}
-              <span className="flex items-center text-gray-700 text-base font-normal ml-2 whitespace-nowrap">
+              <span className="hidden sm:flex items-center text-gray-700 text-base font-normal ml-2 whitespace-nowrap">
                 <FaUserFriends className="mr-1" />
                 {t('vendors')}
               </span>
             </div>
-            <div className="text-sm text-gray-500 -mt-1 whitespace-nowrap overflow-hidden text-ellipsis">{t('subtitle')}</div>
+            <div className="text-xs sm:text-sm text-gray-500 -mt-1 whitespace-nowrap overflow-hidden text-ellipsis">{t('subtitle')}</div>
           </div>
         </div>
 
         {/* Right: Language Dropdown, Login/Signup or User Info/Cart */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-end mt-2 sm:mt-0">
           <div className="relative" ref={dropdownRef}>
             <button
-              className="flex items-center bg-gray-50 border rounded-lg px-3 py-2 hover:bg-gray-100 transition"
+              className="flex items-center bg-gray-50 border rounded-lg px-2 sm:px-3 py-2 hover:bg-gray-100 transition text-sm sm:text-base"
               onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
             >
               <FaGlobeAsia className="mr-2 text-gray-500" />
@@ -111,11 +111,11 @@ const Header = ({ supplierInfo, cartCount = 0, onCartClick }) => {
               <FaChevronDown className={`ml-2 text-gray-500 transition-transform ${showLanguageDropdown ? 'rotate-180' : ''}`} />
             </button>
             {showLanguageDropdown && (
-              <div className="absolute top-full right-0 mt-1 bg-white border rounded-lg shadow-lg py-1 min-w-[140px] z-50">
+              <div className="absolute top-full right-0 mt-1 bg-white border rounded-lg shadow-lg py-1 min-w-[120px] z-50">
                 {languageOptions.map((lang) => (
                   <button
                     key={lang.code}
-                    className={`w-full text-left px-3 py-2 hover:bg-gray-100 transition ${
+                    className={`w-full text-left px-3 py-2 hover:bg-gray-100 transition text-sm sm:text-base ${
                       language === lang.code ? 'bg-green-50 text-green-600 font-medium' : 'text-gray-700'
                     }`}
                     onClick={() => handleLanguageChange(lang.code)}
@@ -128,7 +128,7 @@ const Header = ({ supplierInfo, cartCount = 0, onCartClick }) => {
           </div>
           {!user && !isLoading && (
             <button
-              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg"
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base w-full sm:w-auto"
               onClick={handleLoginClick}
             >
               {t('loginSignup')}
@@ -139,16 +139,14 @@ const Header = ({ supplierInfo, cartCount = 0, onCartClick }) => {
           )}
           {user && (
             <>
-              <div className="text-right ml-4">
-                <div className="text-gray-500 text-sm">Welcome</div>
-                <div className="font-medium text-gray-800">{user.name}</div>
-                {/* <div className="text-xs text-gray-500 capitalize">{user.role}</div> */}
-                
+              <div className="text-right ml-2 sm:ml-4">
+                <div className="text-gray-500 text-xs sm:text-sm">Welcome</div>
+                <div className="font-medium text-gray-800 text-sm sm:text-base">{user.name}</div>
               </div>
               {user && user.role === 'vendor' && (
                 <button 
                   onClick={onCartClick}
-                  className={`flex items-center gap-2 border px-4 py-2 rounded-lg shadow-sm cursor-pointer hover:bg-gray-100 transition ml-4 relative ${
+                  className={`flex items-center gap-2 border px-3 sm:px-4 py-2 rounded-lg shadow-sm cursor-pointer hover:bg-gray-100 transition ml-2 sm:ml-4 relative text-sm sm:text-base w-full sm:w-auto ${
                     cartCount > 0 ? 'border-green-300 bg-green-50' : ''
                   }`}
                 >
@@ -163,7 +161,7 @@ const Header = ({ supplierInfo, cartCount = 0, onCartClick }) => {
                   )}
                 </button>
               )}
-              <button className="ml-4 text-sm text-red-600 hover:underline cursor-pointer" onClick={handleLogout}>Logout</button>
+              <button className="ml-2 sm:ml-4 text-xs sm:text-sm text-red-600 hover:underline cursor-pointer w-full sm:w-auto" onClick={handleLogout}>Logout</button>
             </>
           )}
         </div>

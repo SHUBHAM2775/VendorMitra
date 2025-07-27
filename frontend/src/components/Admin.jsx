@@ -165,13 +165,13 @@ const Admin = () => {
     <div className="min-h-screen bg-[#faf8ff]">
       <SummaryCards pendingSuppliers={pendingSuppliers} issues={issues} />
 
-      <div className="px-8">
+      <div className="px-2 sm:px-4 md:px-8">
         <div className="bg-white rounded-t-lg shadow">
-          <div className="flex border-b">
+          <div className="flex border-b overflow-x-auto no-scrollbar">
             {["Pending", "Accepted", "Rejected", "Bundles", "Issues"].map(tabName => (
               <button
                 key={tabName}
-                className={`px-6 py-3 font-medium transition ${tab === tabName
+                className={`px-3 sm:px-4 md:px-6 py-2 sm:py-3 font-medium transition text-sm sm:text-base whitespace-nowrap ${tab === tabName
                   ? "text-green-600 border-b-2 border-green-600 bg-green-50"
                   : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                   }`}
@@ -184,7 +184,7 @@ const Admin = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-b-lg shadow mx-0 mb-8 p-6 mt-0">
+      <div className="bg-white rounded-b-lg shadow mx-0 mb-8 p-3 sm:p-6 mt-0">
         {tab === "Pending" && (
           <SupplierManagement
             suppliers={pendingSuppliers}
