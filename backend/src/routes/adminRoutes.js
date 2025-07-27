@@ -4,10 +4,10 @@ const { verifySupplier, getPendingVerifications, getPendingVerificationCount, ge
 const {authMiddleware, isAdmin} = require("../middleware/authMiddleware");
 
 router.get("/pending-verifications", authMiddleware,isAdmin, getPendingVerifications);
-router.get("/rejected-verifications", isAdmin, getRejectedVerifications);
-router.get("/approved-verifications", isAdmin, getApprovedVerifications);
+router.get("/rejected-verifications",authMiddleware,isAdmin, getRejectedVerifications);
+router.get("/approved-verifications",authMiddleware,isAdmin, getApprovedVerifications);
 router.get("/verification-pending-count", authMiddleware, isAdmin, getPendingVerificationCount);
-router.get("/verification-rejected-count", getRejectedVerificationCount);
+router.get("/verification-rejected-count",authMiddleware, isAdmin, getRejectedVerificationCount);
 router.put("/verify-supplier/:id", authMiddleware ,isAdmin, verifySupplier);
 
 module.exports = router;

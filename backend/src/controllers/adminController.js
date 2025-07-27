@@ -31,7 +31,7 @@ const getApprovedVerifications = async (req, res) => {
   try {
     const approvedSuppliers = await User.find({
       role: "supplier",
-      verificationStatus: "verified",
+      verificationStatus: "approved",
     }).select("-password");
 
     res.json({ suppliers: approvedSuppliers });
