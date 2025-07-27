@@ -1,18 +1,63 @@
 import React, { useState, useEffect } from 'react';
-import { FaTimes, FaShoppingCart, FaClipboardList, FaMinus, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaTimes, FaShoppingCart, FaClipboardList, FaMinus, FaPlus, FaTrash, FaSort } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
-import { orderAPI } from '../services/api';
+import { orderAPI, productAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
-const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQuantity, onCheckout }) => {
+const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQuantity, onCheckout, initialTab = 'cart' }) => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('cart'); // 'cart' or 'orders'
+  const [activeTab, setActiveTab] = useState(initialTab); // Use initialTab prop
   const [loading, setLoading] = useState(false);
   const [userOrders, setUserOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [sortOrder, setSortOrder] = useState('desc'); // 'desc' for latest first, 'asc' for oldest first
+  const [productDetails, setProductDetails] = useState({}); // Cache for product details
 
   const totalPrice = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+  // Function to sort orders
+  const sortOrders = (orders, order) => {
+    return [...orders].sort((a, b) => {
+      const dateA = new Date(a.orderedAt);
+      const dateB = new Date(b.orderedAt);
+      return order === 'desc' ? dateB - dateA : dateA - dateB;
+    });
+  };
+
+  // Get sorted orders
+  const sortedOrders = sortOrders(userOrders, sortOrder);
+
+  // Create a mapping for consistent order numbers (oldest = #1, newest = highest number)
+  const getOrderNumber = (order) => {
+    // Sort all orders by date (oldest first) to assign consistent numbers
+    const ordersByDate = [...userOrders].sort((a, b) => new Date(a.orderedAt) - new Date(b.orderedAt));
+    return ordersByDate.findIndex(o => o._id === order._id) + 1;
+  };
+
+  // Handler for toggling sort order
+  const handleSortToggle = () => {
+    setSortOrder(prevOrder => prevOrder === 'desc' ? 'asc' : 'desc');
+  };
+
+  // Function to fetch product details
+  const fetchProductDetails = async (productId) => {
+    if (productDetails[productId]) {
+      return productDetails[productId]; // Return cached data
+    }
+
+    try {
+      const product = await productAPI.getProductById(productId);
+      setProductDetails(prev => ({
+        ...prev,
+        [productId]: product
+      }));
+      return product;
+    } catch (error) {
+      console.error('Error fetching product details:', error);
+      return { name: `Product ${productId}`, error: true }; // Fallback
+    }
+  };
 
   // Fetch user orders when orders tab is active
   useEffect(() => {
@@ -22,6 +67,24 @@ const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQ
         try {
           const orders = await orderAPI.getVendorOrders(user._id);
           setUserOrders(orders);
+          
+          // Fetch product details for all items in orders
+          const productIds = new Set();
+          orders.forEach(order => {
+            order.items.forEach(item => {
+              productIds.add(item.productId);
+            });
+          });
+          
+          // Fetch details for products not in cache
+          const productPromises = Array.from(productIds).map(async (productId) => {
+            if (!productDetails[productId]) {
+              return fetchProductDetails(productId);
+            }
+          });
+          
+          await Promise.all(productPromises.filter(Boolean));
+          
         } catch (error) {
           console.error('Error fetching user orders:', error);
           setUserOrders([]);
@@ -93,6 +156,23 @@ const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQ
         try {
           const orders = await orderAPI.getVendorOrders(user._id);
           setUserOrders(orders);
+          
+          // Fetch product details for new orders
+          const productIds = new Set();
+          orders.forEach(order => {
+            order.items.forEach(item => {
+              productIds.add(item.productId);
+            });
+          });
+          
+          const productPromises = Array.from(productIds).map(async (productId) => {
+            if (!productDetails[productId]) {
+              return fetchProductDetails(productId);
+            }
+          });
+          
+          await Promise.all(productPromises.filter(Boolean));
+          
         } catch (error) {
           console.error('Error refreshing orders:', error);
         }
@@ -207,7 +287,21 @@ const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQ
         )}
         {activeTab === 'orders' && (
           <div className="w-full mx-auto">
-            <h2 className="text-3xl font-extrabold mb-8 text-green-700 flex items-center gap-3"><FaClipboardList className="text-2xl" /> My Orders</h2>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-extrabold text-green-700 flex items-center gap-3">
+                <FaClipboardList className="text-2xl" /> My Orders
+              </h2>
+              {userOrders.length > 0 && (
+                <button
+                  onClick={handleSortToggle}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg font-medium transition-all"
+                  title={`Sort by ${sortOrder === 'desc' ? 'Oldest First' : 'Latest First'}`}
+                >
+                  <FaSort />
+                  {sortOrder === 'desc' ? 'Latest First' : 'Oldest First'}
+                </button>
+              )}
+            </div>
             {ordersLoading ? (
               <div className="p-12 text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
@@ -221,11 +315,11 @@ const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQ
               </div>
             ) : (
               <div className="space-y-6">
-                {userOrders.map((order, idx) => (
+                {sortedOrders.map((order, idx) => (
                   <div key={order._id} className="bg-gray-50 border border-gray-200 rounded-2xl shadow-sm p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <h3 className="text-lg font-bold text-gray-800">Order #{order._id.slice(-8)}</h3>
+                        <h3 className="text-lg font-bold text-gray-800">Order #{getOrderNumber(order)}</h3>
                         <p className="text-sm text-gray-500">
                           Placed on: {new Date(order.orderedAt).toLocaleDateString('en-IN', {
                             year: 'numeric',
@@ -257,8 +351,13 @@ const CartOrdersModal = ({ cartItems, myOrders, onClose, onRemoveItem, onUpdateQ
                         {order.items.map((item, itemIdx) => (
                           <div key={itemIdx} className="flex items-center justify-between bg-white p-3 rounded-lg">
                             <div>
-                              <div className="font-medium text-gray-800">Product ID: {item.productId}</div>
+                              <div className="font-medium text-gray-800">
+                                {productDetails[item.productId]?.name || `Loading product...`}
+                              </div>
                               <div className="text-sm text-gray-600">Quantity: {item.quantity}</div>
+                              {productDetails[item.productId]?.error && (
+                                <div className="text-xs text-red-500">Product details unavailable</div>
+                              )}
                             </div>
                             <div className="text-right">
                               <div className="font-semibold text-gray-800">₹{item.unitPrice}</div>
