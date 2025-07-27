@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
-import { FaCheck } from 'react-icons/fa';
+import { FaCheck, FaSearch } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { productAPI } from '../services/api';
 
@@ -83,9 +83,61 @@ function Home({ onAddToCart }) {
   const [addedToCart, setAddedToCart] = useState(null);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const { isAuthenticated } = useAuth();
+
+  // Filter products based on search term
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredProducts(products);
+      return;
+    }
+
+    const filtered = products.filter(product => {
+      const searchLower = searchTerm.toLowerCase();
+      
+      // Search in product name
+      const productName = getTranslatedField(product, 'name', language).toLowerCase();
+      if (productName.includes(searchLower)) {
+        console.log(`Match found in product name: ${product.name}`);
+        return true;
+      }
+      
+      // Search in product description
+      if (product.description && product.description.toLowerCase().includes(searchLower)) {
+        console.log(`Match found in product description: ${product.name}`);
+        return true;
+      }
+      
+      // Search in supplier name
+      const supplierName = getTranslatedField(product, 'supplier', language).toLowerCase();
+      if (supplierName.includes(searchLower)) {
+        console.log(`Match found in supplier name: ${product.name}`);
+        return true;
+      }
+      
+      // Search in unit
+      if (product.unit && product.unit.toLowerCase().includes(searchLower)) {
+        console.log(`Match found in unit: ${product.name}`);
+        return true;
+      }
+      
+      // Search in address
+      const address = getTranslatedField(product, 'address', language).toLowerCase();
+      if (address.includes(searchLower)) {
+        console.log(`Match found in address: ${product.name}`);
+        return true;
+      }
+      
+      return false;
+    });
+    
+    console.log(`Search term: "${searchTerm}" - Found ${filtered.length} products`);
+    setFilteredProducts(filtered);
+  }, [searchTerm, products, language]);
 
   // Fetch products from API
   useEffect(() => {
@@ -96,11 +148,12 @@ function Home({ onAddToCart }) {
         const response = await productAPI.getProducts();
         const mappedProducts = response.map(mapApiProductToFrontend);
         setProducts(mappedProducts);
+        setFilteredProducts(mappedProducts);
       } catch (err) {
         console.error('Error fetching products:', err);
         setError(err.message || 'Failed to fetch products');
         // Fallback to demo products if API fails
-        setProducts([
+        const demoProducts = [
           {
             id: 1,
             name: "Chaat Stall Starter",
@@ -117,6 +170,7 @@ function Home({ onAddToCart }) {
             verified: true,
             inStock: 15,
             unit: "pack",
+            description: "Complete starter kit for chaat stall including all essential ingredients and spices",
             translations: {
               en: { name: "Chaat Stall Starter", supplier: "Mumbai Fresh Supplies", address: "Andheri West, Mumbai" },
               hi: { name: "चाट स्टाल स्टार्टर", supplier: "मुंबई फ्रेश सप्लाइज", address: "अंधेरी वेस्ट, मुंबई" }
@@ -138,6 +192,7 @@ function Home({ onAddToCart }) {
             verified: true,
             inStock: 8,
             unit: "combo",
+            description: "Assorted street food items perfect for events and gatherings",
             translations: {
               en: { name: "Street Food Combo", supplier: "Delhi Street Foods", address: "Chandni Chowk, Delhi" },
               hi: { name: "स्ट्रीट फूड कॉम्बो", supplier: "दिल्ली स्ट्रीट फूड्स", address: "चांदनी चौक, दिल्ली" }
@@ -159,12 +214,59 @@ function Home({ onAddToCart }) {
             verified: true,
             inStock: 12,
             unit: "kit",
+            description: "Traditional South Indian breakfast items including idli, dosa, and chutneys",
             translations: {
               en: { name: "South Indian Breakfast Kit", supplier: "Bangalore Tiffin Center", address: "Koramangala, Bangalore" },
               hi: { name: "दक्षिण भारतीय नाश्ता किट", supplier: "बैंगलोर टिफिन सेंटर", address: "कोरमंगला, बैंगलोर" }
             }
           },
-        ]);
+          {
+            id: 4,
+            name: "Organic Mangoes",
+            price: 450,
+            supplier: "Organic Farm Fresh",
+            supplierId: "507f1f77bcf86cd799439015", // Valid ObjectId format
+            vendorId: "507f1f77bcf86cd799439012", // Valid ObjectId format
+            rating: 4.8,
+            ratingCount: 156,
+            image: "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=400&q=80",
+            address: "Nashik, Maharashtra",
+            delivery: "Home Delivery, Express",
+            phone: "+91 98765 43213",
+            verified: true,
+            inStock: 25,
+            unit: "kg",
+            description: "Fresh organic mangoes grown without pesticides, perfect for health-conscious consumers",
+            translations: {
+              en: { name: "Organic Mangoes", supplier: "Organic Farm Fresh", address: "Nashik, Maharashtra" },
+              hi: { name: "ऑर्गेनिक आम", supplier: "ऑर्गेनिक फार्म फ्रेश", address: "नासिक, महाराष्ट्र" }
+            }
+          },
+          {
+            id: 5,
+            name: "Organic Vegetables Pack",
+            price: 350,
+            supplier: "Green Earth Organics",
+            supplierId: "507f1f77bcf86cd799439016", // Valid ObjectId format
+            vendorId: "507f1f77bcf86cd799439012", // Valid ObjectId format
+            rating: 4.6,
+            ratingCount: 89,
+            image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=400&q=80",
+            address: "Pune, Maharashtra",
+            delivery: "Home Delivery",
+            phone: "+91 98765 43214",
+            verified: true,
+            inStock: 18,
+            unit: "pack",
+            description: "Assorted organic vegetables including tomatoes, carrots, and spinach",
+            translations: {
+              en: { name: "Organic Vegetables Pack", supplier: "Green Earth Organics", address: "Pune, Maharashtra" },
+              hi: { name: "ऑर्गेनिक सब्जियां पैक", supplier: "ग्रीन अर्थ ऑर्गेनिक्स", address: "पुणे, महाराष्ट्र" }
+            }
+          },
+        ];
+        setProducts(demoProducts);
+        setFilteredProducts(demoProducts);
       } finally {
         setLoading(false);
       }
@@ -228,7 +330,7 @@ function Home({ onAddToCart }) {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen py-10">
+    <div className="bg-gray-50 min-h-screen">
       {/* Success Notification */}
       {addedToCart && (
         <div className="fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-bounce">
@@ -247,18 +349,89 @@ function Home({ onAddToCart }) {
         </div>
       )}
       
-      <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          {t('featuredProducts') || 'Featured Products'}
-        </h1>
+      {/* Hero Section with Search */}
+      <div className="bg-gradient-to-br from-green-50 to-blue-50 py-16 px-4">
+        <div className="container mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+              {language === 'hi' ? 'अपने उत्पाद खोजें' : 'Find Your Products'}
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              {language === 'hi' 
+                ? 'हजारों गुणवत्तापूर्ण उत्पादों में से चुनें और सर्वोत्तम आपूर्तिकर्ताओं से खरीदें' 
+                : 'Discover thousands of quality products from the best suppliers'
+              }
+            </p>
+          </div>
+          
+          {/* Enhanced Search Bar */}
+          <div className="max-w-3xl mx-auto">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <FaSearch className="h-6 w-6 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder={language === 'hi' ? 'उत्पाद, आपूर्तिकर्ता, या विवरण खोजें...' : 'Search products, suppliers, or descriptions...'}
+                className="block w-full pl-12 pr-12 py-4 text-lg border-2 border-gray-200 rounded-2xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-4 focus:ring-green-200 focus:border-green-500 text-gray-900 shadow-lg transition-all duration-200"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-gray-100 rounded-r-2xl transition-colors duration-200"
+                >
+                  <svg className="h-6 w-6 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            
+            {/* Search Results Info */}
+            {searchTerm && (
+              <div className="mt-4 text-sm text-gray-600 text-center">
+                {filteredProducts.length === 0 ? (
+                  <span className="bg-white px-4 py-2 rounded-full shadow-sm inline-block">
+                    {language === 'hi' ? 'कोई परिणाम नहीं मिला' : 'No results found'}
+                  </span>
+                ) : (
+                  <span className="bg-white px-4 py-2 rounded-full shadow-sm inline-block">
+                    {language === 'hi' 
+                      ? `${filteredProducts.length} उत्पाद मिले` 
+                      : `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} found`
+                    }
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      <div className="container mx-auto px-4 py-8">
         
-        {products.length === 0 ? (
+        {filteredProducts.length === 0 && !loading && !error ? (
           <div className="text-center py-10">
-            <div className="text-gray-500 text-lg">No products available</div>
+            <div className="text-gray-500 text-lg">
+              {searchTerm 
+                ? (language === 'hi' ? 'कोई उत्पाद नहीं मिला' : 'No products found') 
+                : (language === 'hi' ? 'कोई उत्पाद उपलब्ध नहीं है' : 'No products available')
+              }
+            </div>
+            {searchTerm && (
+              <button 
+                onClick={() => setSearchTerm('')}
+                className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+              >
+                {language === 'hi' ? 'सभी उत्पाद देखें' : 'View all products'}
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
-            {products.map((item) => (
+            {filteredProducts.map((item) => (
               <div key={item.id} className="bg-white rounded-2xl shadow-lg w-full max-w-sm flex flex-col">
                 <img
                   src={item.image}
