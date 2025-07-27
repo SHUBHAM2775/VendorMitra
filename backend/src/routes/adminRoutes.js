@@ -16,15 +16,30 @@ router.get(
   isAdmin,
   getPendingVerifications
 );
-router.get("/rejected-verifications", getRejectedVerifications);
-router.get("/approved-verifications", getApprovedVerifications);
+router.get(
+  "/rejected-verifications",
+  authMiddleware,
+  isAdmin,
+  getRejectedVerifications
+);
+router.get(
+  "/approved-verifications",
+  authMiddleware,
+  isAdmin,
+  getApprovedVerifications
+);
 router.get(
   "/verification-pending-count",
   authMiddleware,
   isAdmin,
   getPendingVerificationCount
 );
-router.get("/verification-rejected-count", getRejectedVerificationCount);
+router.get(
+  "/verification-rejected-count",
+  authMiddleware,
+  isAdmin,
+  getRejectedVerificationCount
+);
 router.put("/verify-supplier/:id", authMiddleware, isAdmin, verifySupplier);
 
 module.exports = router;
