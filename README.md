@@ -124,6 +124,6 @@ Pull requests and forks welcome! Let’s build VendorMitra together.
 
 
 <p align="center">
-  <strong>Made with ❤️ at a 24-hour hackathon to empower India’s street entrepreneurs.</strong>
+  <strong>Made with ❤️ at a 48-hour hackathon to empower India’s street entrepreneurs.</strong>
 </p>
 ```
