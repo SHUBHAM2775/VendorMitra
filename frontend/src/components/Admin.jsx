@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import SummaryCards from "./admin/SummaryCards";
+import SummaryCards from "./Admin/SummaryCards";
 import {
   getPendingVerifications,
   getApprovedVerifications,
@@ -8,7 +8,7 @@ import {
   verifySupplier,
 } from "../services/adminServices";
 import SupplierManagement from "./Admin/SupplierManagement";
-import VerificationModal from "./admin/VerificationModal";
+import VerificationModal from "./Admin/VerificationModal";
 
 const Admin = () => {
   const [tab, setTab] = useState("Pending");
