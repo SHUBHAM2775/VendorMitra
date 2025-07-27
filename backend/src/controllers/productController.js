@@ -13,7 +13,7 @@ exports.addProduct = async (req, res) => {
   }
 };
 
-// GET /products
+// GET /products - For authenticated users
 exports.getAllProducts = async (req, res) => {
   try {
     let query = { isActive: true };
@@ -25,6 +25,17 @@ exports.getAllProducts = async (req, res) => {
     const products = await Product.find(query).populate("supplierId", "name");
     res.json(products);
   } catch (err) {
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
+};
+
+// GET /products/public - For public access (no authentication required)
+exports.getPublicProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ isActive: true }).populate("supplierId", "name");
+    res.json(products);
+  } catch (err) {
+    console.error('Error fetching public products:', err);
     res.status(500).json({ error: "Failed to fetch products" });
   }
 };

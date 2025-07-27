@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   addProduct,
   getAllProducts,
+  getPublicProducts,
   updateProduct,
   deleteProduct,
   getProductById,
@@ -14,7 +15,7 @@ const { authMiddleware } = require("../middleware/authMiddleware");
 // Routes
 router.post("/add-product", authMiddleware, addProduct);
 router.get("/get-product", authMiddleware, getAllProducts);
-router.get("/public/get-products", getAllProducts); // Public route for getting products
+router.get("/public/get-products", getPublicProducts); // Public route for getting products
 router.get("/my-products", authMiddleware, getMyProducts); // Get current supplier's products
 router.get("/get-product/:id", authMiddleware, getProductById);
 router.put("/update-product/:id", authMiddleware, updateProduct);
