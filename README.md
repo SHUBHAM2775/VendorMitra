@@ -25,7 +25,7 @@
 - 🌟 View supplier ratings and delivery modes
 
 <p align="center">
-  <img src="(https://github.com/user-attachments/assets/b4ede413-5d23-4185-961d-29634157f8f0)" alt="Vendor Dashboard" width="500"/>
+  <img src="https://github.com/user-attachments/assets/b4ede413-5d23-4185-961d-29634157f8f0" alt="Vendor Dashboard" width="500"/>
 </p>
 
 ---
@@ -48,14 +48,13 @@
 - 🚨 Handle user issues
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/f1868ad2-10c5-4547-b7ec-e4cbf8f5ee54)" alt="Supplier Dashboard" width="500"/>
+  <img src="https://github.com/user-attachments/assets/f1868ad2-10c5-4547-b7ec-e4cbf8f5ee54" alt="Supplier Dashboard" width="500"/>
 </p>
 ---
 ### 📸 Orders
 
 <p align="center">
-  <img src="(https://github.com/user-attachments/assets/dfec36c8-251e-46d1-bc09-6b9c8b38b925)
-" alt="App Flow" width="600"/>
+  <img src="https://github.com/user-attachments/assets/dfec36c8-251e-46d1-bc09-6b9c8b38b925" alt="App Flow" width="600"/>
 </p>
 
 
