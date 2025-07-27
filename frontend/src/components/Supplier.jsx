@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import VerificationStatus from "./supplier/VerificationStatus";
+import VerificationStatus from "./Supplier/VerificationStatus";
 import SummaryCards from "./Supplier/SummaryCards";
 import AddProductForm from "./Supplier/AddProductForm";
 import TabNavigation from "./Supplier/TabNavigation";
@@ -14,6 +14,7 @@ const Supplier = () => {
   const { user, logout } = useAuth();
   const [tab, setTab] = useState("Products");
   const [products, setProducts] = useState([]);
+  
   const [loading, setLoading] = useState(true);
   const [editIndex, setEditIndex] = useState(null);
   const [editProduct, setEditProduct] = useState(null);
@@ -375,7 +376,7 @@ const Supplier = () => {
   };
 
   const handleVerificationSubmit = async (e) => {
-    e.preventDefault();
+    //e.preventDefault();
     setSubmittingVerification(true);
 
     try {
@@ -485,16 +486,20 @@ const Supplier = () => {
       ) : (
         <>
           {/* Verification Status Component */}
-          <VerificationStatus
-            userId={user?._id}
-            showVerificationForm={showVerificationForm}
-            setShowVerificationForm={setShowVerificationForm}
-            verificationForm={verificationForm}
-            handleVerificationFormChange={handleVerificationFormChange}
-            handleVerificationSubmit={handleVerificationSubmit}
-            submittingVerification={submittingVerification}
-          />
-
+<VerificationStatus
+  userId={user?._id}
+  showVerificationForm={showVerificationForm}
+  setShowVerificationForm={setShowVerificationForm}
+  verificationForm={verificationForm}
+  handleVerificationFormChange={handleVerificationFormChange}
+  handleVerificationSubmit={handleVerificationSubmit}
+  submittingVerification={submittingVerification}
+  verificationStatus={verificationStatus} // 🔥 Add this line
+   onSuccessfulSubmit={() => {
+    setShowVerificationForm(false);
+    setVerificationStatus("pending"); // <- Update local state!
+  }}
+/>
 
           {/* Summary Cards Component */}
           <SummaryCards products={products} orders={orders} />

@@ -1,31 +1,30 @@
-const User = require('../models/user');
+const User = require("../models/user");
 
 const getUserProfile = async (req, res) => {
   try {
     const userId = req.params.id;
 
     // Fetch user by ID, exclude password field
-    const user = await User.findById(userId).select('-password');
+    const user = await User.findById(userId).select("-password");
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.json(user);
   } catch (error) {
-    console.error('Error fetching user profile:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
-
 
 // PUT /users/:id
 const updateUserProfile = async (req, res) => {
   const userId = req.params.id;
-  const allowedUpdates = ['name', 'phone', 'kycDocs','fssaiNumber'];
+  const allowedUpdates = ["name", "phone", "kycDocs", "fssaiNumber"];
   const updates = {};
 
-  allowedUpdates.forEach(field => {
+  allowedUpdates.forEach((field) => {
     if (req.body[field] !== undefined) {
       updates[field] = req.body[field];
     }
@@ -38,20 +37,18 @@ const updateUserProfile = async (req, res) => {
       userId,
       { $set: updates },
       { new: true, runValidators: true }
-    ).select('-password'); // Do not return password
+    ).select("-password"); // Do not return password
 
     if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.json(updatedUser);
   } catch (err) {
-    console.error('Update error:', err);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Update error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
-
-
 
 const uploadKycDocs = async (req, res) => {
   try {
@@ -78,19 +75,18 @@ const uploadKycDocs = async (req, res) => {
   }
 };
 
-
-
-
 const getVerifiedSuppliers = async (req, res) => {
   try {
-    const suppliers = await User.find({ role: 'supplier', isVerified: true }).select('-password');
+    const suppliers = await User.find({
+      role: "supplier",
+      isVerified: true,
+    }).select("-password");
     res.status(200).json({ success: true, suppliers });
   } catch (err) {
-    console.error('Error fetching verified suppliers:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error("Error fetching verified suppliers:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
 
 const getVerificationStatusById = async (req, res) => {
   try {
@@ -113,6 +109,10 @@ const getVerificationStatusById = async (req, res) => {
   }
 };
 
-module.exports = { getUserProfile, updateUserProfile, uploadKycDocs, getVerifiedSuppliers, getVerificationStatusById };
-
-
+module.exports = {
+  getUserProfile,
+  updateUserProfile,
+  uploadKycDocs,
+  getVerifiedSuppliers,
+  getVerificationStatusById,
+};

@@ -18,40 +18,54 @@ const Cart = ({ items, onClose, onRemoveItem, onUpdateQuantity, onOrderSuccess }
     setLoading(true);
     
     try {
-      // Get vendor and supplier information from cart items
-      const firstItem = items[0];
-      
       // Generate a valid MongoDB ObjectId format for vendorId if not available
       const generateObjectId = () => {
         return '507f1f77bcf86cd799439011'; // Valid demo ObjectId
       };
       
-      const vendorId = user?._id || user?.vendorId || firstItem?.vendorId || generateObjectId();
-      const supplierId = firstItem?.supplierId;
-      
-      if (!supplierId) {
-        alert('Missing supplier information. Please try again.');
-        setLoading(false);
-        return;
-      }
+      const vendorId = user?._id || user?.vendorId || generateObjectId();
       
       // Validate that vendorId is a valid ObjectId format (24 hex characters)
       const objectIdRegex = /^[0-9a-fA-F]{24}$/;
       const finalVendorId = objectIdRegex.test(vendorId) ? vendorId : generateObjectId();
       
-      const orderData = {
-        vendorId: finalVendorId,
-        supplierId,
-        items: items.map(item => ({
-          productId: item.id,
-          quantity: item.quantity,
-          unitPrice: item.price
-        })),
-        deliveryType: 'pickup', // You can make this dynamic if needed
-      };
+      // Group cart items by supplier
+      const itemsBySupplier = items.reduce((groups, item) => {
+        const supplierId = item.supplierId;
+        if (!supplierId) {
+          console.error('Item missing supplierId:', item);
+          return groups;
+        }
+        
+        if (!groups[supplierId]) {
+          groups[supplierId] = [];
+        }
+        groups[supplierId].push(item);
+        return groups;
+      }, {});
       
-      const result = await orderAPI.placeOrder(orderData);
-      alert('Order placed successfully!');
+      // Create separate orders for each supplier
+      const orderPromises = Object.entries(itemsBySupplier).map(async ([supplierId, supplierItems]) => {
+        const orderData = {
+          vendorId: finalVendorId,
+          supplierId,
+          items: supplierItems.map(item => ({
+            productId: item.id,
+            supplierId: item.supplierId, // Add supplierId for each item
+            quantity: item.quantity,
+            unitPrice: item.price
+          })),
+          deliveryType: 'pickup', // You can make this dynamic if needed
+        };
+        
+        return orderAPI.placeOrder(orderData);
+      });
+      
+      // Wait for all orders to be placed
+      const results = await Promise.all(orderPromises);
+      
+      const orderCount = results.length;
+      alert(`${orderCount} order${orderCount > 1 ? 's' : ''} placed successfully!`);
       
       // Call success callback to handle post-order actions
       if (onOrderSuccess) {

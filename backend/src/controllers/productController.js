@@ -5,7 +5,7 @@ exports.addProduct = async (req, res) => {
   try {
     const product = await Product.create({
       ...req.body,
-      supplierId: req.user.id, // from auth middleware
+      supplierId: req.user.id,
     });
     res.status(201).json(product);
   } catch (err) {
@@ -13,20 +13,16 @@ exports.addProduct = async (req, res) => {
   }
 };
 
-// GET /products - For authenticated users, return only their products if they are suppliers
+// GET /products
 exports.getAllProducts = async (req, res) => {
   try {
     let query = { isActive: true };
-    
-    // If user is authenticated and is a supplier, only show their products
-    if (req.user && req.user.role === 'supplier') {
+
+    if (req.user && req.user.role === "supplier") {
       query.supplierId = req.user.id;
     }
-    
-    const products = await Product.find(query).populate(
-      "supplierId",
-      "name"
-    );
+
+    const products = await Product.find(query).populate("supplierId", "name");
     res.json(products);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch products" });
@@ -34,7 +30,6 @@ exports.getAllProducts = async (req, res) => {
 };
 
 //get products by id
-
 
 // PUT /products/:id
 exports.updateProduct = async (req, res) => {
@@ -96,8 +91,16 @@ exports.getProductsBySupplierId = async (req, res) => {
     }
 
     // Security check: If user is a supplier, only allow accessing their own products
-    if (req.user && req.user.role === 'supplier' && req.user.id !== supplierId) {
-      return res.status(403).json({ message: "Access denied. You can only view your own products." });
+    if (
+      req.user &&
+      req.user.role === "supplier" &&
+      req.user.id !== supplierId
+    ) {
+      return res
+        .status(403)
+        .json({
+          message: "Access denied. You can only view your own products.",
+        });
     }
 
     const products = await Product.find({ supplierId, isActive: true });
@@ -112,13 +115,15 @@ exports.getProductsBySupplierId = async (req, res) => {
 // GET /products/my-products - Get current supplier's products
 exports.getMyProducts = async (req, res) => {
   try {
-    if (!req.user || req.user.role !== 'supplier') {
-      return res.status(403).json({ message: "Access denied. Suppliers only." });
+    if (!req.user || req.user.role !== "supplier") {
+      return res
+        .status(403)
+        .json({ message: "Access denied. Suppliers only." });
     }
 
-    const products = await Product.find({ 
-      supplierId: req.user.id, 
-      isActive: true 
+    const products = await Product.find({
+      supplierId: req.user.id,
+      isActive: true,
     });
 
     res.status(200).json(products);
