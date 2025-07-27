@@ -6,6 +6,7 @@ const {
   uploadKycDocs,
   getVerifiedSuppliers,
   getVerificationStatusById,
+  updateVerificationStatus,
 } = require("../controllers/userController");
 const { authMiddleware } = require("../middleware/authMiddleware");
 const upload = require("../utils/upload");
@@ -28,6 +29,12 @@ router.get("/suppliers", authMiddleware, getVerifiedSuppliers);
 router.get(
   "/verification-status/:id",
   getVerificationStatusById
+);
+
+router.patch(
+  "/verification-status/:id",
+  authMiddleware, // Optional: use role-based access control if needed
+  updateVerificationStatus
 );
 
 module.exports = router;

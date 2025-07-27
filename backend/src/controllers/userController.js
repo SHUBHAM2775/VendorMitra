@@ -111,10 +111,46 @@ const getVerificationStatusById = async (req, res) => {
   }
 };
 
+const updateVerificationStatus = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { verificationStatus } = req.body;
+
+    const validStatuses = ["pending", "approved", "rejected", "not_submitted"];
+    if (!validStatuses.includes(verificationStatus)) {
+      return res.status(400).json({ message: "Invalid verification status" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        verificationStatus,
+        isVerified: verificationStatus === "approved", // auto-toggle isVerified flag
+        updatedAt: new Date(),
+      },
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      message: "Verification status updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error updating verification status:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 module.exports = {
   getUserProfile,
   updateUserProfile,
   uploadKycDocs,
   getVerifiedSuppliers,
   getVerificationStatusById,
+  updateVerificationStatus,
 };
