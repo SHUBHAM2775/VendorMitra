@@ -2,39 +2,39 @@ import React, { useEffect, useState } from "react";
 import { getVerificationStatusById } from "../../services/userServices";
 import { FaExclamationTriangle, FaCheckCircle, FaTimes } from "react-icons/fa";
 
+
 const VerificationStatus = ({
   userId,
-  verificationStatus,
   showVerificationForm,
   setShowVerificationForm,
   verificationForm,
   handleVerificationFormChange,
   handleVerificationSubmit,
-  submittingVerification
+  submittingVerification,
+   onSuccessfulSubmit,
 }) => {
-  useEffect(() => {
-    const fetchStatus = async () => {
-      try {
-        const data = await getVerificationStatusById(userId);
+  const [verificationStatus, setVerificationStatus] = useState("not_submitted");
+const fetchStatus = async () => {
+  try {
+    const data = await getVerificationStatusById(userId);
 
-        if (!data.verificationStatus || data.verificationStatus === "pending" && !data.fssaiNumber) {
-          // Treat it as not submitted if status is pending but FSSAI is missing
-          setVerificationStatus("not_submitted");
-        } else if (data.verificationStatus === "approved") {
-          setVerificationStatus("verified");
-        } else {
-          setVerificationStatus(data.verificationStatus); // "pending" or "rejected"
-        }
-      } catch (error) {
-        console.error("Error fetching verification status:", error);
-        setVerificationStatus("not_submitted"); // fallback on error
-      }
-    };
-
-    if (userId) {
-      fetchStatus();
+    if (!data.verificationStatus || (data.verificationStatus === "pending" && !data.fssaiNumber)) {
+      setVerificationStatus("not_submitted");
+    } else if (data.verificationStatus === "approved") {
+      setVerificationStatus("verified");
+    } else {
+      setVerificationStatus(data.verificationStatus);
     }
-  }, [userId]);
+  } catch (error) {
+    console.error("Error fetching verification status:", error);
+    setVerificationStatus("not_submitted");
+  }
+};
+
+useEffect(() => {
+  if (userId) fetchStatus();
+}, [userId]);
+
 
   return (
     <>
@@ -151,7 +151,17 @@ const VerificationStatus = ({
               </button>
             </div>
 
-            <form onSubmit={handleVerificationSubmit} className="p-6">
+<form
+  onSubmit={async (e) => {
+    e.preventDefault();
+    const success = await handleVerificationSubmit(e);
+    if (success) {
+      await fetchStatus(); // ← refresh after success
+      setShowVerificationForm(false); // ← close modal
+    }
+  }}
+  className="p-6"
+>
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>

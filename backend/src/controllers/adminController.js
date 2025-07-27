@@ -6,7 +6,7 @@ const getPendingVerifications = async (req, res) => {
     const pendingSuppliers = await User.find({
       role: "supplier",
       verificationStatus: "pending",
-    }).select("-password");
+    }).select("-password"); // don’t send password back
 
     res.json({ suppliers: pendingSuppliers });
   } catch (err) {
@@ -14,34 +14,55 @@ const getPendingVerifications = async (req, res) => {
   }
 };
 
+const getRejectedVerifications = async (req, res) => {
+  try {
+    const rejectedSuppliers = await User.find({
+      role: "supplier",
+      verificationStatus: "rejected",
+    }).select("-password");
+
+    res.json({ suppliers: rejectedSuppliers });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+const getApprovedVerifications = async (req, res) => {
+  try {
+    const approvedSuppliers = await User.find({
+      role: "supplier",
+      verificationStatus: "approved",
+    }).select("-password");
+
+    res.json({ suppliers: approvedSuppliers });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 // PUT /api/admin/verify-supplier/:id
 const verifySupplier = async (req, res) => {
+  const { id } = req.params; // from URL
+  const { status } = req.body; // from request body
+
+  if (!["approved", "rejected"].includes(status)) {
+    return res.status(400).json({ error: "Invalid status value" });
+  }
+
   try {
-    console.log("verifySupplier", req.body);
-    const { status } = req.body;
+    const updatedSupplier = await User.findByIdAndUpdate(
+      id,
+      { verificationStatus: status },
+      { new: true }
+    ).select("-password");
 
-    if (!["approved", "rejected"].includes(status)) {
-      return res.status(400).json({ message: "Invalid status value" });
+    if (!updatedSupplier) {
+      return res.status(404).json({ error: "Supplier not found" });
     }
 
-    const supplier = await User.findById(req.params.id);
-    if (!supplier || supplier.role !== "supplier") {
-      return res.status(404).json({ message: "Supplier not found" });
-    }
-
-    if (status === "approved" && !supplier.fssaiNumber) {
-      return res
-        .status(400)
-        .json({ message: "FSSAI number is missing. Cannot approve." });
-    }
-
-    supplier.verificationStatus = status;
-    supplier.isVerified = status === "approved";
-    supplier.updatedAt = new Date();
-    await supplier.save();
-
-    res.json({ message: `Supplier ${status} successfully` });
-  } catch (err) {
+    res.json({ message: "Supplier updated", supplier: updatedSupplier });
+  } catch (error) {
+    console.error("Error updating supplier:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -75,8 +96,10 @@ const getRejectedVerificationCount = async (req, res) => {
 };
 
 module.exports = {
+  verifySupplier,
   getPendingVerifications,
+  getRejectedVerifications,
+  getApprovedVerifications,
   getPendingVerificationCount,
   getRejectedVerificationCount,
-  verifySupplier,
 };
