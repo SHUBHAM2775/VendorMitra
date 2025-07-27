@@ -40,7 +40,8 @@ useEffect(() => {
   }, 5000); // every 5 seconds
 
   return () => clearInterval(interval);
-}, [userId]);
+}, []);
+
 
 
   useEffect(() => {
