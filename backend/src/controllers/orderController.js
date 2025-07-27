@@ -64,6 +64,11 @@ exports.getOrdersBySupplier = async (req, res) => {
       return res.status(400).json({ message: "Supplier ID is required" });
     }
 
+    // Security check: If user is a supplier, only allow accessing their own orders
+    if (req.user && req.user.role === 'supplier' && req.user.id !== supplierId) {
+      return res.status(403).json({ message: "Access denied. You can only view your own orders." });
+    }
+
     const orders = await Order.find({ supplierId });
 
     res.status(200).json(orders);
@@ -90,14 +95,20 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(400).json({ message: "Invalid status value" });
     }
 
-    const updatedOrder = await Order.findByIdAndUpdate(
-      orderId,
+    // Security check: If user is a supplier, only allow updating their own orders
+    let query = { _id: orderId };
+    if (req.user && req.user.role === 'supplier') {
+      query.supplierId = req.user.id;
+    }
+
+    const updatedOrder = await Order.findOneAndUpdate(
+      query,
       { status, updatedAt: new Date() },
       { new: true }
     );
 
     if (!updatedOrder) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(404).json({ message: "Order not found or unauthorized" });
     }
 
     res.json(updatedOrder);
@@ -109,7 +120,14 @@ exports.updateOrderStatus = async (req, res) => {
 
 exports.getTotalOrderCount = async (req, res) => {
   try {
-    const count = await Order.countDocuments();
+    let query = {};
+    
+    // If user is a supplier, only count their orders
+    if (req.user && req.user.role === 'supplier') {
+      query.supplierId = req.user.id;
+    }
+    
+    const count = await Order.countDocuments(query);
     res.status(200).json({ totalOrders: count });
   } catch (error) {
     console.error("Error getting total order count:", error);
@@ -119,7 +137,14 @@ exports.getTotalOrderCount = async (req, res) => {
 
 exports.getPendingOrderCount = async (req, res) => {
   try {
-    const count = await Order.countDocuments({ status: "pending" });
+    let query = { status: "pending" };
+    
+    // If user is a supplier, only count their pending orders
+    if (req.user && req.user.role === 'supplier') {
+      query.supplierId = req.user.id;
+    }
+    
+    const count = await Order.countDocuments(query);
     res.status(200).json({ pendingOrders: count });
   } catch (error) {
     console.error("Error getting pending order count:", error);
@@ -133,6 +158,11 @@ exports.getDispatchedOrdersForSupplier = async (req, res) => {
 
     if (!supplierId) {
       return res.status(400).json({ message: "Supplier ID is required" });
+    }
+
+    // Security check: If user is a supplier, only allow accessing their own orders
+    if (req.user && req.user.role === 'supplier' && req.user.id !== supplierId) {
+      return res.status(403).json({ message: "Access denied. You can only view your own orders." });
     }
 
     const orders = await Order.find({
@@ -155,6 +185,11 @@ exports.getPendingOrdersForSupplier = async (req, res) => {
       return res.status(400).json({ message: "Supplier ID is required" });
     }
 
+    // Security check: If user is a supplier, only allow accessing their own orders
+    if (req.user && req.user.role === 'supplier' && req.user.id !== supplierId) {
+      return res.status(403).json({ message: "Access denied. You can only view your own orders." });
+    }
+
     const orders = await Order.find({
       supplierId,
       status: "pending",
@@ -163,6 +198,50 @@ exports.getPendingOrdersForSupplier = async (req, res) => {
     res.status(200).json(orders);
   } catch (error) {
     console.error("Error fetching pending orders:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// Get current supplier's orders (authenticated endpoint)
+exports.getMyOrders = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== 'supplier') {
+      return res.status(403).json({ message: "Access denied. Suppliers only." });
+    }
+
+    const orders = await Order.find({ 
+      supplierId: req.user.id 
+    }).sort({ orderedAt: -1 });
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Error fetching supplier's orders:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// Get current supplier's orders by status
+exports.getMyOrdersByStatus = async (req, res) => {
+  try {
+    const { status } = req.params;
+    
+    if (!req.user || req.user.role !== 'supplier') {
+      return res.status(403).json({ message: "Access denied. Suppliers only." });
+    }
+
+    const validStatuses = ["pending", "accepted", "rejected", "dispatched", "delivered"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const orders = await Order.find({ 
+      supplierId: req.user.id,
+      status: status
+    }).sort({ orderedAt: -1 });
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Error fetching supplier's orders by status:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };

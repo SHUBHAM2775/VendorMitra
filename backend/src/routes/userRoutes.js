@@ -5,6 +5,7 @@ const {
   updateUserProfile,
   uploadKycDocs,
   getVerifiedSuppliers,
+  getVerificationStatusById,
 } = require("../controllers/userController");
 const { authMiddleware } = require("../middleware/authMiddleware");
 const upload = require("../utils/upload");
@@ -23,5 +24,12 @@ router.post(
 );
 
 router.get("/suppliers", authMiddleware, getVerifiedSuppliers);
+
+// Route: GET /users/:id/verification-status
+router.get(
+  "/verification-status/:id",
+  authMiddleware,
+  getVerificationStatusById
+);
 
 module.exports = router;

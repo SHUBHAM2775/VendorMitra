@@ -52,15 +52,9 @@ const Supplier = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      let response;
       
-      // If user is logged in, get their specific products
-      if (user?.id) {
-        response = await productAPI.getProductsBySupplierId(user.id);
-      } else {
-        // Fallback to all products if no user
-        response = await productAPI.getProducts();
-      }
+      // Use the secure API that automatically filters by current supplier
+      const response = await productAPI.getMyProducts();
       
       const mappedProducts = response.map(mapApiProductToComponent);
       setProducts(mappedProducts);
@@ -104,10 +98,8 @@ const Supplier = () => {
     try {
       setOrdersLoading(true);
       
-      // Use the hardcoded supplier ID from the user request
-      const supplierId = user?.id || "6883e0a1a968e706de13e93d";
-      
-      const ordersData = await orderAPI.getSupplierOrders(supplierId);
+      // Use the secure API that automatically filters by current supplier
+      const ordersData = await orderAPI.getMyOrders();
       
       // Fetch product details for each order item
       const ordersWithProductDetails = await Promise.all(
