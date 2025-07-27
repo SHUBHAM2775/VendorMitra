@@ -17,23 +17,21 @@ const VerificationStatus = ({
   const fetchStatus = async () => {
     try {
       const data = await getVerificationStatusById(userId);
-
-      if (!data.verificationStatus || data.verificationStatus === "pending") {
-        if (!data.fssaiNumber) {
-          setVerificationStatus("not_submitted");
-        } else {
-          setVerificationStatus("pending");
-        }
+      if (!data.verificationStatus) {
+        setVerificationStatus("not_submitted");
       } else if (data.verificationStatus === "approved") {
         setVerificationStatus("verified");
+      } else if (data.verificationStatus === "rejected") {
+        setVerificationStatus("rejected");
       } else {
-        setVerificationStatus(data.verificationStatus); // 'rejected'
+        setVerificationStatus("pending"); // You can skip this if you don't show it
       }
     } catch (error) {
       console.error("Error fetching verification status:", error);
       setVerificationStatus("not_submitted");
     }
   };
+
 
 
   useEffect(() => {
@@ -82,28 +80,6 @@ const VerificationStatus = ({
       )}
 
       {/* Verification Pending Note */}
-      {verificationStatus === "pending" && (
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mx-8 mt-6 rounded-lg shadow-sm">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <FaExclamationTriangle className="h-5 w-5 text-blue-400" />
-            </div>
-            <div className="ml-3 flex-1">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-blue-800">
-                  Verification Under Review
-                </h3>
-              </div>
-              <div className="mt-2 text-sm text-blue-700">
-                <p>Your verification details have been submitted and are currently under review by our admin team.</p>
-                <p className="mt-1 text-xs">
-                  You will be notified once the verification is complete. This usually takes 1-2 business days.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Verification Rejected Note */}
       {verificationStatus === "rejected" && (
@@ -166,7 +142,7 @@ const VerificationStatus = ({
                 e.preventDefault();
                 const success = await handleVerificationSubmit(e);
                 if (success) {
-                  await fetchStatus();            // ✅ Refresh UI
+                  await fetchStatus();           // ✅ updates state
                   setShowVerificationForm(false);
                   if (onSuccessfulSubmit) {
                     onSuccessfulSubmit();         // ✅ Notify parent component
