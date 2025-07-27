@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { getVerificationStatusById, updateVerificationStatus } from "../../services/userServices";
-import { FaExclamationTriangle, FaCheckCircle, FaTimes } from "react-icons/fa";
-
+import {
+  getVerificationStatusById,
+  updateVerificationStatus,
+} from "../../services/userServices";
+import {
+  FaExclamationTriangle,
+  FaCheckCircle,
+  FaTimes,
+} from "react-icons/fa";
 
 const VerificationStatus = ({
   userId,
@@ -13,40 +19,33 @@ const VerificationStatus = ({
   submittingVerification,
   onSuccessfulSubmit,
 }) => {
-  const [verificationStatus, setVerificationStatus] = useState("not_submitted");
+  const [verificationStatus, setVerificationStatus] = useState("pending");
+
   const fetchStatus = async () => {
     try {
       const data = await getVerificationStatusById(userId);
-      if (!data.verificationStatus) {
-        setVerificationStatus("not_submitted");
-      } else if (data.verificationStatus === "approved") {
+      const status = data.verificationStatus;
+
+      if (status === "approved") {
         setVerificationStatus("verified");
-      } else if (data.verificationStatus === "rejected") {
+      } else if (status === "rejected") {
         setVerificationStatus("rejected");
       } else {
-        setVerificationStatus("pending"); // You can skip this if you don't show it
+        setVerificationStatus("pending");
       }
     } catch (error) {
       console.error("Error fetching verification status:", error);
-      setVerificationStatus("not_submitted");
+      setVerificationStatus("pending"); // fallback to pending
     }
   };
 
-
-
   useEffect(() => {
     if (userId) {
-      fetchStatus(); // 🔥 Fetch once immediately on mount
-      const interval = setInterval(() => {
-        fetchStatus(); // ✅ Then keep polling
-      }, 5000);
-
+      fetchStatus(); // initial fetch
+      const interval = setInterval(fetchStatus, 5000); // polling
       return () => clearInterval(interval);
     }
-  }, [userId]); // include userId in deps in case it's async-loaded
-
-
-
+  }, [userId]);
 
   useEffect(() => {
     if (!showVerificationForm && userId) {
@@ -56,8 +55,7 @@ const VerificationStatus = ({
 
   return (
     <>
-      {/* Verification Reminder Note */}
-      {verificationStatus === "not_submitted" && (
+      {verificationStatus === "pending" && (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mx-8 mt-6 rounded-lg shadow-sm">
           <div className="flex items-start">
             <div className="flex-shrink-0">
@@ -76,10 +74,19 @@ const VerificationStatus = ({
                 </button>
               </div>
               <div className="mt-2 text-sm text-yellow-700">
-                <p>Please verify your account to access all features and build trust with customers.</p>
+                <p>
+                  Please verify your account to access all features and build
+                  trust with customers.
+                </p>
                 <p className="mt-1 text-xs">
-                  <strong>Certificate Verification Options:</strong> FSSAI license verification available at{" "}
-                  <a href="https://foscos.fssai.gov.in/verification/license" target="_blank" rel="noopener noreferrer" className="underline">
+                  <strong>Certificate Verification Options:</strong> FSSAI
+                  license verification available at{" "}
+                  <a
+                    href="https://foscos.fssai.gov.in/verification/license"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
                     foscos.fssai.gov.in
                   </a>
                 </p>
@@ -89,9 +96,6 @@ const VerificationStatus = ({
         </div>
       )}
 
-      {/* Verification Pending Note */}
-
-      {/* Verification Rejected Note */}
       {verificationStatus === "rejected" && (
         <div className="bg-red-50 border-l-4 border-red-400 p-4 mx-8 mt-6 rounded-lg shadow-sm">
           <div className="flex items-start">
@@ -106,11 +110,10 @@ const VerificationStatus = ({
                 <button
                   onClick={async () => {
                     try {
-                      await updateVerificationStatus(userId, "pending"); // backend call
-                      setVerificationStatus("pending"); // frontend state update
+                      await updateVerificationStatus(userId, "pending");
+                      setVerificationStatus("pending");
                     } catch (error) {
                       console.error("Failed to update status:", error);
-                      // Optional: show error toast/message here
                     }
                   }}
                   className="bg-red-600 text-white px-4 py-1 rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
@@ -119,9 +122,13 @@ const VerificationStatus = ({
                 </button>
               </div>
               <div className="mt-2 text-sm text-red-700">
-                <p>Your verification was not approved. Please review your submitted documents and resubmit.</p>
+                <p>
+                  Your verification was not approved. Please review your
+                  submitted documents and resubmit.
+                </p>
                 <p className="mt-1 text-xs">
-                  Make sure your FSSAI license is valid and all information is accurate.
+                  Make sure your FSSAI license is valid and all information is
+                  accurate.
                 </p>
               </div>
             </div>
@@ -129,7 +136,6 @@ const VerificationStatus = ({
         </div>
       )}
 
-      {/* Verification Status Badge */}
       {verificationStatus === "verified" && (
         <div className="bg-green-50 border-l-4 border-green-400 p-4 mx-8 mt-6 rounded-lg shadow-sm">
           <div className="flex items-center">
@@ -146,7 +152,9 @@ const VerificationStatus = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
-              <h2 className="text-xl font-semibold text-gray-900">Account Verification</h2>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Account Verification
+              </h2>
               <button
                 onClick={() => setShowVerificationForm(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -160,15 +168,18 @@ const VerificationStatus = ({
                 e.preventDefault();
                 const success = await handleVerificationSubmit(e);
                 if (success) {
-                  await fetchStatus();           // ✅ updates state
+                  await fetchStatus();
                   setShowVerificationForm(false);
                   if (onSuccessfulSubmit) {
-                    onSuccessfulSubmit();         // ✅ Notify parent component
+                    onSuccessfulSubmit();
                   }
                 }
               }}
               className="p-6"
             >
+              {/* Form fields remain unchanged */}
+              {/* ... form content here (unchanged from your code) ... */}
+
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -184,7 +195,6 @@ const VerificationStatus = ({
                       required
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Certificate Type *
@@ -213,12 +223,16 @@ const VerificationStatus = ({
                     value={verificationForm.fssaiNumber}
                     onChange={handleVerificationFormChange}
                     className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-200"
-                    placeholder="e.g., 12345678901234"
                     required
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Verify FSSAI license at{" "}
-                    <a href="https://foscos.fssai.gov.in/verification/license" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                    <a
+                      href="https://foscos.fssai.gov.in/verification/license"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline"
+                    >
                       foscos.fssai.gov.in
                     </a>
                   </p>
@@ -252,7 +266,6 @@ const VerificationStatus = ({
                       required
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Phone Number *
@@ -295,7 +308,8 @@ const VerificationStatus = ({
                     required
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Upload FSSAI license, BMC certificate, or other relevant documents (PDF, JPG, PNG)
+                    Upload FSSAI license, BMC certificate, or other relevant
+                    documents (PDF, JPG, PNG)
                   </p>
                 </div>
               </div>
@@ -324,4 +338,4 @@ const VerificationStatus = ({
   );
 };
 
-export default VerificationStatus; 
+export default VerificationStatus;
