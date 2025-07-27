@@ -25,10 +25,12 @@ router.post(
 
 router.get("/suppliers", authMiddleware, getVerifiedSuppliers);
 
-// Route: GET /users/:id/verification-status
 router.get(
   "/verification-status/:id",
-  authMiddleware,
+  (req, res, next) => {
+    console.log("✅ verification-status route hit:", req.params.id);
+    next();
+  },
   getVerificationStatusById
 );
 
