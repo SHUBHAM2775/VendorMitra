@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getVerificationStatusById } from "../../services/userServices";
+import { getVerificationStatusById, updateVerificationStatus } from "../../services/userServices";
 import { FaExclamationTriangle, FaCheckCircle, FaTimes } from "react-icons/fa";
 
 
@@ -34,16 +34,16 @@ const VerificationStatus = ({
 
 
 
-useEffect(() => {
-  if (userId) {
-    fetchStatus(); // 🔥 Fetch once immediately on mount
-    const interval = setInterval(() => {
-      fetchStatus(); // ✅ Then keep polling
-    }, 5000);
+  useEffect(() => {
+    if (userId) {
+      fetchStatus(); // 🔥 Fetch once immediately on mount
+      const interval = setInterval(() => {
+        fetchStatus(); // ✅ Then keep polling
+      }, 5000);
 
-    return () => clearInterval(interval);
-  }
-}, [userId]); // include userId in deps in case it's async-loaded
+      return () => clearInterval(interval);
+    }
+  }, [userId]); // include userId in deps in case it's async-loaded
 
 
 
@@ -104,7 +104,15 @@ useEffect(() => {
                   Verification Rejected
                 </h3>
                 <button
-                  onClick={() => setVerificationStatus("pending")}
+                  onClick={async () => {
+                    try {
+                      await updateVerificationStatus(userId, "pending"); // backend call
+                      setVerificationStatus("pending"); // frontend state update
+                    } catch (error) {
+                      console.error("Failed to update status:", error);
+                      // Optional: show error toast/message here
+                    }
+                  }}
                   className="bg-red-600 text-white px-4 py-1 rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
                 >
                   Resubmit
