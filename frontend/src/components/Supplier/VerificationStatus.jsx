@@ -35,12 +35,16 @@ const VerificationStatus = ({
 
 
 useEffect(() => {
-  const interval = setInterval(() => {
-    if (userId) fetchStatus();
-  }, 5000); // every 5 seconds
+  if (userId) {
+    fetchStatus(); // 🔥 Fetch once immediately on mount
+    const interval = setInterval(() => {
+      fetchStatus(); // ✅ Then keep polling
+    }, 5000);
 
-  return () => clearInterval(interval);
-}, []);
+    return () => clearInterval(interval);
+  }
+}, [userId]); // include userId in deps in case it's async-loaded
+
 
 
 
@@ -100,7 +104,7 @@ useEffect(() => {
                   Verification Rejected
                 </h3>
                 <button
-                  onClick={() => setShowVerificationForm(true)}
+                  onClick={() => setVerificationStatus("pending")}
                   className="bg-red-600 text-white px-4 py-1 rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
                 >
                   Resubmit
