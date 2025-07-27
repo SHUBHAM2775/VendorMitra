@@ -133,7 +133,37 @@ export const productAPI = {
     }
   },
 
-  // Get products by supplier ID
+  // Get current supplier's products (authenticated)
+  getMyProducts: async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      };
+      
+      const response = await fetch('http://localhost:5000/api/prod/my-products', {
+        method: 'GET',
+        headers: headers,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching my products:', error);
+      throw error;
+    }
+  },
+
+  // Get products by supplier ID (with security check)
   getProductsBySupplierId: async (supplierId) => {
     try {
       const token = localStorage.getItem('authToken');
@@ -265,7 +295,79 @@ export const orderAPI = {
     }
   },
 
-  // Get supplier orders
+  // Get current supplier's orders (authenticated)
+  getMyOrders: async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+
+      const response = await fetch(
+        "http://localhost:5000/api/orders/my-orders",
+        {
+          method: "GET",
+          headers: headers,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching my orders:", error);
+      throw error;
+    }
+  },
+
+  // Get current supplier's orders by status (authenticated)
+  getMyOrdersByStatus: async (status) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+
+      const response = await fetch(
+        `http://localhost:5000/api/orders/my-orders/${status}`,
+        {
+          method: "GET",
+          headers: headers,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching my orders by status:", error);
+      throw error;
+    }
+  },
+
+  // Get supplier orders (with security check)
   getSupplierOrders: async (supplierId) => {
     try {
       const token = localStorage.getItem("authToken");
