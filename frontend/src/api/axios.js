@@ -6,6 +6,8 @@ const API = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 10000, // 10 second timeout
+  withCredentials: false, // Set to true if you need cookies
 });
 
 // Automatically include token if available
@@ -18,6 +20,19 @@ API.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for better error handling
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.code === 'ECONNABORTED') {
+      console.error('Request timeout');
+    } else if (error.response?.status === 0) {
+      console.error('Network error - check if backend is running');
+    }
     return Promise.reject(error);
   }
 );

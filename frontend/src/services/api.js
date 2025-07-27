@@ -9,6 +9,7 @@ const apiCall = async (endpoint, options = {}) => {
       "Content-Type": "application/json",
       ...options.headers,
     },
+    mode: 'cors', // Explicitly set CORS mode
     ...options,
   };
 
@@ -20,14 +21,26 @@ const apiCall = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(url, config);
-    const data = await response.json();
-
+    
+    // Check if response is ok
     if (!response.ok) {
-      throw new Error(data.error || "API request failed");
+      const errorText = await response.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { error: errorText || `HTTP error! status: ${response.status}` };
+      }
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
+    console.error('API Call Error:', error);
+    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+      throw new Error('Network error: Unable to connect to server. Please check if the server is running.');
+    }
     throw error;
   }
 };
@@ -41,11 +54,24 @@ const publicApiCall = async (endpoint, options = {}) => {
       "Content-Type": "application/json",
       ...options.headers,
     },
+    mode: 'cors', // Explicitly set CORS mode
     ...options,
   };
 
   try {
     const response = await fetch(url, config);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { error: errorText || `HTTP error! status: ${response.status}` };
+      }
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+
     const data = await response.json();
 
     if (!response.ok) {
