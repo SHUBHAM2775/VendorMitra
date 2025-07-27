@@ -37,7 +37,7 @@
 - 🏷️ Earn “Verified” badge on KYC
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/f32bbc2a-f69a-4e85-a5f7-3938cd0b0798)" alt="Supplier Dashboard" width="500"/>
+  <img src="https://github.com/user-attachments/assets/f32bbc2a-f69a-4e85-a5f7-3938cd0b0798" alt="Supplier Dashboard" width="500"/>
 </p>
 
 ---
