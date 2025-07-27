@@ -442,6 +442,76 @@ export const orderAPI = {
     return apiCall('/auth/suppliers');
   },
 
+  // Get total order count (filtered by supplier if supplier role)
+  getTotalOrderCount: async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(
+        "http://localhost:5000/api/orders/total-orders",
+        {
+          method: "GET",
+          headers: headers,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching total order count:", error);
+      throw error;
+    }
+  },
+
+  // Get pending order count (filtered by supplier if supplier role)
+  getPendingOrderCount: async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(
+        "http://localhost:5000/api/orders/pending-orders",
+        {
+          method: "GET",
+          headers: headers,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching pending order count:", error);
+      throw error;
+    }
+  },
+
 };
 
 // Token management
