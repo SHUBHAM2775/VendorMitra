@@ -1,4 +1,4 @@
-const User = require("../models/user"); 
+const User = require("../models/user");
 
 // GET /api/admin/pending-verifications
 const getPendingVerifications = async (req, res) => {
@@ -29,8 +29,10 @@ const verifySupplier = async (req, res) => {
       return res.status(404).json({ message: "Supplier not found" });
     }
 
-     if (status === "approved" && !supplier.fssaiNumber) {
-      return res.status(400).json({ message: "FSSAI number is missing. Cannot approve." });
+    if (status === "approved" && !supplier.fssaiNumber) {
+      return res
+        .status(400)
+        .json({ message: "FSSAI number is missing. Cannot approve." });
     }
 
     supplier.verificationStatus = status;
@@ -48,7 +50,7 @@ const getPendingVerificationCount = async (req, res) => {
   try {
     const count = await User.countDocuments({
       role: "supplier",
-      verificationStatus: "pending"
+      verificationStatus: "pending",
     });
 
     res.json({ count });
@@ -62,7 +64,7 @@ const getRejectedVerificationCount = async (req, res) => {
   try {
     const count = await User.countDocuments({
       role: "supplier",
-      verificationStatus: "rejected"
+      verificationStatus: "rejected",
     });
 
     res.json({ count });
@@ -71,7 +73,6 @@ const getRejectedVerificationCount = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
-
 
 module.exports = {
   getPendingVerifications,
