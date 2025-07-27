@@ -108,7 +108,9 @@ const Supplier = () => {
           const itemsWithProductDetails = await Promise.all(
             order.items.map(async (item) => {
               try {
-                const productDetails = await productAPI.getProductById(item.productId);
+                // Fix: always extract the string ID
+                const productId = typeof item.productId === 'object' && item.productId._id ? item.productId._id : item.productId;
+                const productDetails = await productAPI.getProductById(productId);
                 return {
                   ...item,
                   productName: productDetails.name,
