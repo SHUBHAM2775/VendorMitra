@@ -73,13 +73,12 @@ const publicApiCall = async (endpoint, options = {}) => {
     }
 
     const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "API request failed");
-    }
-
     return data;
   } catch (error) {
+    console.error('Public API Call Error:', error);
+    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+      throw new Error('Network error: Unable to connect to server. Please check if the server is running.');
+    }
     throw error;
   }
 };
@@ -123,10 +122,11 @@ export const productAPI = {
         };
 
         const response = await fetch(
-          "http://localhost:5000/api/prod/get-product",
+          `${API_BASE_URL}/prod/get-product`,
           {
             method: "GET",
             headers: headers,
+            mode: 'cors',
           }
         );
 
@@ -138,12 +138,13 @@ export const productAPI = {
 
       // For non-authenticated users or if auth fails, use public endpoint
       const response = await fetch(
-        "http://localhost:5000/api/prod/public/get-products",
+        `${API_BASE_URL}/prod/public/get-products`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
+          mode: 'cors',
         }
       );
 
@@ -172,9 +173,10 @@ export const productAPI = {
         Authorization: `Bearer ${token}`,
       };
       
-      const response = await fetch('http://localhost:5000/api/prod/my-products', {
+      const response = await fetch(`${API_BASE_URL}/prod/my-products`, {
         method: 'GET',
         headers: headers,
+        mode: 'cors',
       });
       
       if (!response.ok) {
@@ -201,9 +203,10 @@ export const productAPI = {
         headers.Authorization = `Bearer ${token}`;
       }
       
-      const response = await fetch(`http://localhost:5000/api/prod/supplier/${supplierId}`, {
+      const response = await fetch(`${API_BASE_URL}/prod/supplier/${supplierId}`, {
         method: 'GET',
         headers: headers,
+        mode: 'cors',
       });
       
       if (!response.ok) {
@@ -230,9 +233,10 @@ export const productAPI = {
         headers.Authorization = `Bearer ${token}`;
       }
       
-      const response = await fetch(`http://localhost:5000/api/prod/get-product/${productId}`, {
+      const response = await fetch(`${API_BASE_URL}/prod/get-product/${productId}`, {
         method: 'GET',
         headers: headers,
+        mode: 'cors',
       });
       
       if (!response.ok) {
@@ -263,11 +267,12 @@ export const orderAPI = {
       }
 
       const response = await fetch(
-        "http://localhost:5000/api/orders/place-order",
+        `${API_BASE_URL}/orders/place-order`,
         {
           method: "POST",
           headers: headers,
           body: JSON.stringify(orderData),
+          mode: 'cors',
         }
       );
 
@@ -299,10 +304,11 @@ export const orderAPI = {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/orders/vendor/${vendorId}`,
+        `${API_BASE_URL}/orders/vendor/${vendorId}`,
         {
           method: "GET",
           headers: headers,
+          mode: 'cors',
         }
       );
 
@@ -335,10 +341,11 @@ export const orderAPI = {
       };
 
       const response = await fetch(
-        "http://localhost:5000/api/orders/my-orders",
+        `${API_BASE_URL}/orders/my-orders`,
         {
           method: "GET",
           headers: headers,
+          mode: 'cors',
         }
       );
 
@@ -371,10 +378,11 @@ export const orderAPI = {
       };
 
       const response = await fetch(
-        `http://localhost:5000/api/orders/my-orders/${status}`,
+        `${API_BASE_URL}/orders/my-orders/${status}`,
         {
           method: "GET",
           headers: headers,
+          mode: 'cors',
         }
       );
 
@@ -406,10 +414,11 @@ export const orderAPI = {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/orders/supplier/${supplierId}`,
+        `${API_BASE_URL}/orders/supplier/${supplierId}`,
         {
           method: "GET",
           headers: headers,
+          mode: 'cors',
         }
       );
 
@@ -441,11 +450,12 @@ export const orderAPI = {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/orders/${orderId}/status`,
+        `${API_BASE_URL}/orders/${orderId}/status`,
         {
           method: "PUT",
           headers: headers,
           body: JSON.stringify({ status }),
+          mode: 'cors',
         }
       );
 
@@ -481,10 +491,11 @@ export const orderAPI = {
       }
 
       const response = await fetch(
-        "http://localhost:5000/api/orders/total-orders",
+        `${API_BASE_URL}/orders/total-orders`,
         {
           method: "GET",
           headers: headers,
+          mode: 'cors',
         }
       );
 
@@ -516,10 +527,11 @@ export const orderAPI = {
       }
 
       const response = await fetch(
-        "http://localhost:5000/api/orders/pending-orders",
+        `${API_BASE_URL}/orders/pending-orders`,
         {
           method: "GET",
           headers: headers,
+          mode: 'cors',
         }
       );
 
