@@ -9,7 +9,7 @@ import DispatchManagement from "./Supplier/DispatchManagement";
 import Toast from "./Supplier/Toast";
 import { useAuth } from "../context/AuthContext";
 import { tokenManager, productAPI, orderAPI } from "../services/api";
-import { getVerificationStatusById } from "../../services/user"; 
+import { getVerificationStatusById } from "../services/userServices"; 
 
 
 const Supplier = () => {
@@ -71,7 +71,7 @@ const Supplier = () => {
   };
 
   // Fetch products when component mounts or user changes
-  useEffect(() => {
+ useEffect(() => {
   const fetchVerificationStatus = async () => {
     try {
       const statusData = await getVerificationStatusById(user._id);
@@ -85,6 +85,7 @@ const Supplier = () => {
     fetchVerificationStatus();
   }
 }, [user?._id]);
+
 
 
   // Verification states
