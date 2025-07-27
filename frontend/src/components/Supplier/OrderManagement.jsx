@@ -125,13 +125,11 @@ const OrderManagement = ({ orders, handleAcceptOrder, handleRejectOrder, ordersL
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="font-medium text-gray-900">
-                        {item.productName || 'Product name unavailable'}
+                        {item.productName ? item.productName : 'Product name unavailable'}
                       </div>
-                      {item.productDescription && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          {item.productDescription}
-                        </div>
-                      )}
+                      <div className="text-xs text-gray-500 mt-1">
+                        {item.productDescription ? item.productDescription : 'No description available'}
+                      </div>
                     </div>
                     <div className="text-right ml-4">
                       <div className="text-sm font-medium">
