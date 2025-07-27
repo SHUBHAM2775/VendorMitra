@@ -21,6 +21,11 @@
 > Replace the below with actual images or GitHub-hosted links (drag & drop in issues or commit)
 
 ### 🔐 Login Page  
+![WhatsApp Image 2025-07-27 at 23 52 31_51b35228](https://github.com/user-attachments/assets/a5132791-ff09-4455-930f-132ceb13c2da)
+
+
+
+### 🔐 Home Page
 ![home page](https://github.com/user-attachments/assets/58f18a7f-5df8-4d13-bef8-fd38c5d1795e)
 
 
@@ -37,24 +42,9 @@
 
 
 ### 🛒 Supplier Panel  
-![Supplier Panel](./screenshots/supplier-dashboard.png)
+![WhatsApp Image 2025-07-27 at 23 53 49_84f8d99f](https://github.com/user-attachments/assets/6f1662d6-fc9a-4c0a-a804-8d4a99dabaaa)
 
-### 📦 Add Product  
-![Add Product](./screenshots/add-product.png)
 
----
-
-## 🌐 Multilingual Support (Coming Soon)
-
-The app will soon support multiple regional languages including:
-
-- हिंदी (Hindi)
-- मराठी (Marathi)
-- ગુજરાતી (Gujarati)
-- বাংলা (Bengali)
-- English (Default)
-
----
 
 > ✨ Stay tuned for updates. Pull requests & contributions welcome once we go public!
 
