@@ -9,6 +9,24 @@
     "addToCart": "Add to Cart",
     "address": "Address",
     "delivery": "Delivery",
-    "phone": "Phone"
+    "phone": "Phone",
+    "login": "Login",
+    "signup": "Signup",
+    "logout": "Logout",
+    "loginSignup": "Login / Signup",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "role": "Role",
+    "enterEmailPassword": "Please enter email and password",
+    "fillAllFields": "Please fill all fields",
+    "loggingIn": "Logging in...",
+    "signingUp": "Signing up...",
+    "createAccount": "Create your account",
+    "welcomeBack": "Welcome back",
+    "close": "Close",
+    "vendor": "Vendor",
+    "supplier": "Supplier",
+    "admin": "Admin"
   }
   
