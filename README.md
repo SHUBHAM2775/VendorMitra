@@ -2,7 +2,7 @@
 ---
 
 <p align="center">
-  <img src="![894ee78e-3956-463a-92ed-229b70018352](https://github.com/user-attachments/assets/ed180ac3-709c-42e2-a2ff-23e0dc23b928)" alt="VendorMitra Banner" width="600"/>
+  <img src="https://github.com/user-attachments/assets/ed180ac3-709c-42e2-a2ff-23e0dc23b928" alt="VendorMitra Banner" width="600"/>
 </p>
 
 
