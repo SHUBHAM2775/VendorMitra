@@ -9,6 +9,16 @@ export const getPendingVerifications = async () => {
   return res.data.suppliers;
 };
 
+export const getRejectedVerifications = async () => {
+  const res = await API.get(`${API_BASE}/rejected-verifications`);  
+  return res.data.suppliers;
+};
+
+export const getApprovedVerifications = async () => {
+  const res = await API.get(`${API_BASE}/approved-verifications`);
+  return res.data.suppliers;
+};
+
 // Approve or reject supplier
 export const verifySupplier = async (id, status) => {
   const res = await API.put(`${API_BASE}/verify-supplier/${id}`, { status });
