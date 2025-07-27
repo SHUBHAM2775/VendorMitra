@@ -26,3 +26,8 @@ export const getRejectedVerificationCount = async () => {
   const res = await API.get(`${API_BASE}/verification-rejected-count`);
   return res.data.count;
 };
+
+export const getVerifiedSuppliers = async () => {
+  const response = await axios.get(`${API_BASE}/verified-suppliers`);
+  return response.data.suppliers;
+};

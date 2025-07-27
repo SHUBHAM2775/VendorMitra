@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import SummaryCards from "./admin/SummaryCards";
-import { getPendingVerifications,verifySupplier } from "../services/adminServices";
+import { getPendingVerifications, getVerifiedSuppliers, verifySupplier } from "../services/adminServices";
 import SupplierManagement from "./admin/SupplierManagement";
 import BundleManagement from "./admin/BundleManagement";
 import IssueManagement from "./admin/IssueManagement";
@@ -53,6 +53,45 @@ const [rejectedSuppliers, setRejectedSuppliers] = useState([]);
   };
 
   fetchSuppliers();
+}, []);
+
+
+useEffect(() => {
+  const fetchVerifiedSuppliers = async () => {
+    try {
+      const suppliers = await getVerifiedSuppliers();
+
+      const formattedSuppliers = suppliers.map((s) => ({
+        id: s._id,
+        name: s.name,
+        fssaiLicenseNumber: s.kycDocs?.[0] || "N/A",
+        submittedDate: new Date(s.createdAt).toISOString().split("T")[0],
+        status: "accepted",
+        verificationStatus: "approved",
+        verificationDetails: {
+          businessName: s.name,
+          fssaiNumber: s.kycDocs?.[0] || "",
+          certificateType: "FSSAI",
+          businessAddress: "N/A",
+          contactPerson: s.name,
+          phoneNumber: s.phone || "N/A",
+          email: s.email,
+          certificateFile: {
+            name: s.kycDocs?.[0] || "Document",
+            url: "#",
+            type: "application/pdf"
+          },
+          submittedDate: new Date(s.createdAt).toISOString().split("T")[0]
+        }
+      }));
+
+      setAcceptedSuppliers(formattedSuppliers);
+    } catch (err) {
+      console.error("Failed to fetch verified suppliers:", err);
+    }
+  };
+
+  fetchVerifiedSuppliers();
 }, []);
 
 const handleVerify = async (id) => {
@@ -265,13 +304,16 @@ const handleVerify = async (id) => {
             handleApproveSupplier={handleApproveSupplier}
           />
         )}
+
         {tab === "Accepted" && (
           <SupplierManagement
             pendingSuppliers={acceptedSuppliers}
             handleRejectSupplier={() => {}}
             handleApproveSupplier={() => {}}
+            statusFilter="accepted"
           />
         )}
+        
         {tab === "Rejected" && (
           <SupplierManagement
             pendingSuppliers={rejectedSuppliers}
