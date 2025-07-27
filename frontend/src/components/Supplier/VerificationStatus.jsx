@@ -34,9 +34,14 @@ const VerificationStatus = ({
 
 
 
-  useEffect(() => {
+useEffect(() => {
+  const interval = setInterval(() => {
     if (userId) fetchStatus();
-  }, [userId]);
+  }, 5000); // every 5 seconds
+
+  return () => clearInterval(interval);
+}, [userId]);
+
 
   useEffect(() => {
     if (!showVerificationForm && userId) {
