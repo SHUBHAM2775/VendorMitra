@@ -22,7 +22,7 @@ const getUserProfile = async (req, res) => {
 // PUT /users/:id
 const updateUserProfile = async (req, res) => {
   const userId = req.params.id;
-  const allowedUpdates = ['name', 'phone', 'kycDocs'];
+  const allowedUpdates = ['name', 'phone', 'kycDocs', 'fssaiNumber'];
   const updates = {};
 
   allowedUpdates.forEach(field => {

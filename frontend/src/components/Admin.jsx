@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import SummaryCards from "./admin/SummaryCards";
-import { getPendingVerifications,verifySupplier } from "../services/adminServices";
+import { getPendingVerifications } from "../services/adminServices";
 import SupplierManagement from "./admin/SupplierManagement";
 import BundleManagement from "./admin/BundleManagement";
 import IssueManagement from "./admin/IssueManagement";
@@ -54,21 +54,6 @@ const [rejectedSuppliers, setRejectedSuppliers] = useState([]);
 
   fetchSuppliers();
 }, []);
-
-const handleVerify = async (id) => {
-  try {
-    await verifySupplier(id, "verified");
-    toast.success("Supplier verified successfully!");
-
-    // Refresh pending suppliers
-    const updatedSuppliers = pendingSuppliers.filter(supplier => supplier._id !== id);
-    setPendingSuppliers(updatedSuppliers);
-  } catch (error) {
-    console.error("Verification failed:", error);
-    toast.error("Failed to verify supplier.");
-  }
-};
-
 
 
   // Sample data for bundles
