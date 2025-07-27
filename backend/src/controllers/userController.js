@@ -96,7 +96,7 @@ const getVerificationStatusById = async (req, res) => {
   try {
     const userId = req.params.id;
 
-    const user = await User.findById(userId).select("isVerified verificationStatus");
+    const user = await User.findById(userId).select("isVerified verificationStatus fssaiNumber");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -105,6 +105,7 @@ const getVerificationStatusById = async (req, res) => {
     res.status(200).json({
       isVerified: user.isVerified,
       verificationStatus: user.verificationStatus,
+      fssaiNumber: user.fssaiNumber || "", // Add empty fallback if needed
     });
   } catch (error) {
     console.error("Error getting verification status:", error);
