@@ -43,7 +43,6 @@ const getApprovedVerifications = async (req, res) => {
 // PUT /api/admin/verify-supplier/:id
 const verifySupplier = async (req, res) => {
   try {
-    console.log("verifySupplier", req.body);
     const { status } = req.body; // "approved" or "rejected"
 
     if (!["approved", "rejected"].includes(status)) {
@@ -51,26 +50,30 @@ const verifySupplier = async (req, res) => {
     }
 
     const supplier = await User.findById(req.params.id);
+
     if (!supplier || supplier.role !== "supplier") {
       return res.status(404).json({ message: "Supplier not found" });
     }
 
     if (status === "approved" && !supplier.fssaiNumber) {
-      return res
-        .status(400)
-        .json({ message: "FSSAI number is missing. Cannot approve." });
+      return res.status(400).json({
+        message: "FSSAI number is missing. Cannot approve the supplier.",
+      });
     }
 
     supplier.verificationStatus = status;
     supplier.isVerified = status === "approved";
     supplier.updatedAt = new Date();
+
     await supplier.save();
 
-    res.json({ message: `Supplier ${status} successfully` });
+    res.json({ message: `Supplier ${status} successfully`, supplier });
   } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    console.error("Verify Supplier Error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
+
 
 const getPendingVerificationCount = async (req, res) => {
   try {

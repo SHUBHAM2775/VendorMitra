@@ -1,5 +1,4 @@
 import API from "../api/axios";
-
 const API_BASE = "/admin";
 
 // Get all pending supplier verifications
@@ -22,10 +21,17 @@ export const getApprovedVerifications = async () => {
 };
 
 // Approve or reject supplier
-export const verifySupplier = async (id, status) => {
-  const res = await API.put(`${API_BASE}/verify-supplier/${id}`, { status });
-  return res.data;
+export const verifySupplier = async (supplierId, status) => {
+  try {
+    const response = await API.put(`${API_BASE}/verify-supplier/${supplierId}`, {
+      status: status,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
+
 
 // Get count of pending verifications
 export const getPendingVerificationCount = async () => {
@@ -40,6 +46,11 @@ export const getRejectedVerificationCount = async () => {
 };
 
 export const getVerifiedSuppliers = async () => {
-  const response = await axios.get(`${API_BASE}/verified-suppliers`);
+  const response = await API.get(`/admin/verified-suppliers`);
   return response.data.suppliers;
 };
+
+export const rejectSupplier = async (id) => {
+  return verifySupplier(id, "rejected");
+};
+
