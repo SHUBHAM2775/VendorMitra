@@ -25,7 +25,7 @@
 - 🌟 View supplier ratings and delivery modes
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/00000000/vendor-dashboard.png" alt="Vendor Dashboard" width="500"/>
+  <img src="(https://github.com/user-attachments/assets/b4ede413-5d23-4185-961d-29634157f8f0)" alt="Vendor Dashboard" width="500"/>
 </p>
 
 ---
@@ -37,7 +37,7 @@
 - 🏷️ Earn “Verified” badge on KYC
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/00000000/supplier-dashboard.png" alt="Supplier Dashboard" width="500"/>
+  <img src="https://github.com/user-attachments/assets/f32bbc2a-f69a-4e85-a5f7-3938cd0b0798)" alt="Supplier Dashboard" width="500"/>
 </p>
 
 ---
@@ -47,7 +47,17 @@
 - 🧩 Create/manage product bundles
 - 🚨 Handle user issues
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f1868ad2-10c5-4547-b7ec-e4cbf8f5ee54)" alt="Supplier Dashboard" width="500"/>
+</p>
 ---
+### 📸 Orders
+
+<p align="center">
+  <img src="(https://github.com/user-attachments/assets/dfec36c8-251e-46d1-bc09-6b9c8b38b925)
+" alt="App Flow" width="600"/>
+</p>
+
 
 ### ✅ Trust Mechanism
 - ⭐ Vendor reviews (1–5 stars + comment)
@@ -83,16 +93,6 @@
 - **Trust-Driven:** Suppliers are verified + rated, building buyer confidence.
 - **Minimal Logistics:** Vendors pick up orders or coordinate low-cost shared delivery.
 - **Scalable Model:** Start in one locality, grow city-wise.
-
----
-
-## 📸 Preview
-
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/00000000/flow-diagram.png" alt="App Flow" width="600"/>
-</p>
-
----
 
 ## 🚀 Quick Start (for Developers)
 
