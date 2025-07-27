@@ -98,10 +98,8 @@ const Supplier = () => {
     try {
       setOrdersLoading(true);
       
-      // Use the hardcoded supplier ID from the user request
-      const supplierId = user?.id || "6883e0a1a968e706de13e93d";
-      
-      const ordersData = await orderAPI.getSupplierOrders(supplierId);
+      // Use the secure API that automatically filters by current supplier
+      const ordersData = await orderAPI.getMyOrders();
       
       // Fetch product details for each order item
       const ordersWithProductDetails = await Promise.all(
