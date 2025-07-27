@@ -4,6 +4,8 @@ import {
   getPendingVerifications,
   getApprovedVerifications,
   getRejectedVerifications,
+  rejectSupplier,
+  verifySupplier,
 } from "../services/adminServices";
 import SupplierManagement from "./admin/SupplierManagement";
 import BundleManagement from "./admin/BundleManagement";
@@ -73,23 +75,39 @@ const Admin = () => {
   }, []);
 
   // 🔵 Supplier Verification Handlers
-  const handleApproveSupplier = (supplierId) => {
-    setPendingSuppliers(prev => {
-      const supplier = prev.find(s => s.id === supplierId);
-      if (!supplier) return prev;
-      setAcceptedSuppliers(acc => [...acc, { ...supplier, verificationStatus: "approved" }]);
-      return prev.filter(s => s.id !== supplierId);
-    });
+ const handleApproveSupplier = async (supplierId) => {
+  try {
+    await verifySupplier(supplierId, "approved");
+    setPendingSuppliers(prev =>
+      prev.filter(supplier => supplier.id !== supplierId)
+    );
+
+    // Fetch updated approved suppliers from backend
+    const approved = await getApprovedVerifications();
+    setAcceptedSuppliers(formatSuppliers(approved));
+  } catch (err) {
+    console.error("Error approving supplier:", err);
+  }
+};
+
+
+  const handleRejectSupplier = async (supplierId) => {
+    try {
+      await rejectSupplier(supplierId);
+
+      // Remove from pending
+      setPendingSuppliers(prev =>
+        prev.filter(supplier => supplier.id !== supplierId)
+      );
+
+      // Re-fetch rejected list from backend
+      const rejected = await getRejectedVerifications();
+      setRejectedSuppliers(formatSuppliers(rejected));
+    } catch (err) {
+      console.error("Error rejecting supplier:", err);
+    }
   };
 
-  const handleRejectSupplier = (supplierId) => {
-    setPendingSuppliers(prev => {
-      const supplier = prev.find(s => s.id === supplierId);
-      if (!supplier) return prev;
-      setRejectedSuppliers(rej => [...rej, { ...supplier, verificationStatus: "rejected" }]);
-      return prev.filter(s => s.id !== supplierId);
-    });
-  };
 
   // 🟡 Modal Verification Handlers
   const handleApproveVerification = (supplierId) => {
@@ -191,7 +209,7 @@ const Admin = () => {
             suppliers={rejectedSuppliers}
             handleRejectSupplier={() => { }}
             handleApproveSupplier={() => { }}
-            statusFilter="rejected" 
+            statusFilter="rejected"
           />
         )}
 
