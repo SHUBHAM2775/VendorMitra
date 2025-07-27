@@ -52,10 +52,10 @@ const Supplier = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      
+
       // Use the secure API that automatically filters by current supplier
       const response = await productAPI.getMyProducts();
-      
+
       const mappedProducts = response.map(mapApiProductToComponent);
       setProducts(mappedProducts);
     } catch (error) {
@@ -97,30 +97,42 @@ const Supplier = () => {
   const fetchOrders = async () => {
     try {
       setOrdersLoading(true);
-      
+
       // Use the secure API that automatically filters by current supplier
       const ordersData = await orderAPI.getMyOrders();
-      
-      // Map order items to include product details from populated data
-      const ordersWithProductDetails = ordersData.map((order) => {
-        const itemsWithProductDetails = order.items.map((item) => {
-          // The product details are already populated by the backend
-          const productDetails = item.productId || {};
-          
+
+      // Fetch product details for each order item
+      const ordersWithProductDetails = await Promise.all(
+        ordersData.map(async (order) => {
+          const itemsWithProductDetails = await Promise.all(
+            order.items.map(async (item) => {
+              try {
+                const productDetails = await productAPI.getProductById(item.productId);
+                return {
+                  ...item,
+                  productName: productDetails.name,
+                  productDescription: productDetails.description,
+                  productImage: productDetails.image
+                };
+              } catch (error) {
+                console.error(`Error fetching product details for ${item.productId}:`, error);
+                return {
+                  ...item,
+                  productName: "Product name unavailable",
+                  productDescription: "Product details unavailable",
+                  productImage: null
+                };
+              }
+            })
+          );
+
           return {
-            ...item,
-            productName: productDetails.name || "Product name unavailable",
-            productDescription: productDetails.description || "Product details unavailable",
-            productImage: productDetails.image || null
+            ...order,
+            items: itemsWithProductDetails
           };
-        });
-        
-        return {
-          ...order,
-          items: itemsWithProductDetails
-        };
-      });
-      
+        })
+      );
+
       setOrders(ordersWithProductDetails);
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -141,7 +153,7 @@ const Supplier = () => {
   const handleEditClick = (idx) => {
     const product = products[idx];
     setEditIndex(idx);
-    setEditProduct({ 
+    setEditProduct({
       category: product.category || "General",
       price: product.price,
       stock: product.stock,
@@ -161,7 +173,7 @@ const Supplier = () => {
     try {
       const token = tokenManager.getToken();
       const productToUpdate = products[editIndex];
-      
+
       if (!token) {
         setShowToast({ type: "error", message: "Please log in to edit products." });
         return;
@@ -192,11 +204,11 @@ const Supplier = () => {
 
       // Refresh the product list to get updated data
       await fetchProducts();
-      
+
       setEditIndex(null);
       setEditProduct(null);
       setShowToast({ type: "success", message: "Product updated successfully!" });
-      
+
     } catch (error) {
       console.error("Error updating product:", error);
       setShowToast({ type: "error", message: "Failed to update product" });
@@ -220,18 +232,18 @@ const Supplier = () => {
       setShowToast({ type: "error", message: "Please fill all required fields." });
       return;
     }
-    
+
     // Optional: Validate that image is uploaded (uncomment if you want to make image required)
     // if (!form.image) {
     //   setShowToast({ type: "error", message: "Please upload a product image." });
     //   return;
     // }
-    
+
     setAdding(true);
-    
+
     try {
       const token = tokenManager.getToken();
-      
+
       if (!token || !user) {
         setShowToast({ type: "error", message: "Please log in to add products." });
         setAdding(false);
@@ -249,7 +261,7 @@ const Supplier = () => {
         pricePerUnit: parseFloat(form.pricePerUnit),
         stockQty: parseInt(form.stockQty),
       });
-      
+
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
@@ -281,10 +293,10 @@ const Supplier = () => {
       }
 
       const data = await response.json();
-      
+
       // Refresh the product list from the server to get the latest data
       await fetchProducts();
-      
+
       setShowToast({ type: "success", message: "Product added successfully!" });
       setForm({
         name: "",
@@ -295,7 +307,7 @@ const Supplier = () => {
         image: "", // Reset image field
         supplierId: user?.id || "SUPPLIER_ID_PLACEHOLDER" // Use current user ID
       });
-      
+
     } catch (error) {
       console.error("Error adding product:", error);
       if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
@@ -311,7 +323,7 @@ const Supplier = () => {
   const handleAcceptOrder = async (orderId) => {
     try {
       await orderAPI.updateOrderStatus(orderId, "accepted");
-      setOrders(prev => prev.map(order => 
+      setOrders(prev => prev.map(order =>
         order._id === orderId ? { ...order, status: "accepted" } : order
       ));
       setShowToast({ type: "success", message: "Order accepted successfully!" });
@@ -324,7 +336,7 @@ const Supplier = () => {
   const handleRejectOrder = async (orderId) => {
     try {
       await orderAPI.updateOrderStatus(orderId, "rejected");
-      setOrders(prev => prev.map(order => 
+      setOrders(prev => prev.map(order =>
         order._id === orderId ? { ...order, status: "rejected" } : order
       ));
       setShowToast({ type: "success", message: "Order rejected successfully!" });
@@ -337,7 +349,7 @@ const Supplier = () => {
   const handleMarkDispatched = async (orderId) => {
     try {
       await orderAPI.updateOrderStatus(orderId, "dispatched");
-      setOrders(prev => prev.map(order => 
+      setOrders(prev => prev.map(order =>
         order._id === orderId ? { ...order, status: "dispatched" } : order
       ));
       setShowToast({ type: "success", message: "Order marked as dispatched!" });
@@ -365,7 +377,7 @@ const Supplier = () => {
   const handleVerificationSubmit = async (e) => {
     e.preventDefault();
     setSubmittingVerification(true);
-    
+
     try {
       const userId = user?.id;
       if (!userId) {
@@ -400,7 +412,7 @@ const Supplier = () => {
           },
           body: JSON.stringify(userUpdateData)
         }),
-        
+
         // API 2: Upload KYC documents
         fetch(`http://localhost:5000/api/users/${userId}/verify`, {
           method: 'POST',
@@ -426,11 +438,11 @@ const Supplier = () => {
       setSubmittingVerification(false);
       setShowVerificationForm(false);
       setVerificationStatus("pending");
-      setShowToast({ 
-        type: "success", 
-        message: "Verification details submitted successfully! Admin will review and verify your account." 
+      setShowToast({
+        type: "success",
+        message: "Verification details submitted successfully! Admin will review and verify your account."
       });
-      
+
       // Reset form
       setVerificationForm({
         businessName: "",
@@ -446,9 +458,9 @@ const Supplier = () => {
     } catch (error) {
       console.error('Verification submission error:', error);
       setSubmittingVerification(false);
-      setShowToast({ 
-        type: "error", 
-        message: `Verification submission failed: ${error.message}` 
+      setShowToast({
+        type: "error",
+        message: `Verification submission failed: ${error.message}`
       });
     }
   };
@@ -474,7 +486,7 @@ const Supplier = () => {
         <>
           {/* Verification Status Component */}
           <VerificationStatus
-            verificationStatus={verificationStatus}
+            userId={user?._id}
             showVerificationForm={showVerificationForm}
             setShowVerificationForm={setShowVerificationForm}
             verificationForm={verificationForm}
@@ -482,6 +494,7 @@ const Supplier = () => {
             handleVerificationSubmit={handleVerificationSubmit}
             submittingVerification={submittingVerification}
           />
+
 
           {/* Summary Cards Component */}
           <SummaryCards products={products} orders={orders} />

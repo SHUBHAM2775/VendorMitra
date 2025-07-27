@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getVerificationStatusById } from "../../services/userServices";
 import { FaExclamationTriangle, FaCheckCircle, FaTimes } from "react-icons/fa";
 
 const VerificationStatus = ({
+  userId,
   verificationStatus,
   showVerificationForm,
   setShowVerificationForm,
@@ -10,6 +12,30 @@ const VerificationStatus = ({
   handleVerificationSubmit,
   submittingVerification
 }) => {
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const data = await getVerificationStatusById(userId);
+
+        if (!data.verificationStatus || data.verificationStatus === "pending" && !data.fssaiNumber) {
+          // Treat it as not submitted if status is pending but FSSAI is missing
+          setVerificationStatus("not_submitted");
+        } else if (data.verificationStatus === "approved") {
+          setVerificationStatus("verified");
+        } else {
+          setVerificationStatus(data.verificationStatus); // "pending" or "rejected"
+        }
+      } catch (error) {
+        console.error("Error fetching verification status:", error);
+        setVerificationStatus("not_submitted"); // fallback on error
+      }
+    };
+
+    if (userId) {
+      fetchStatus();
+    }
+  }, [userId]);
+
   return (
     <>
       {/* Verification Reminder Note */}
@@ -124,7 +150,7 @@ const VerificationStatus = ({
                 <FaTimes className="h-5 w-5" />
               </button>
             </div>
-            
+
             <form onSubmit={handleVerificationSubmit} className="p-6">
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -141,7 +167,7 @@ const VerificationStatus = ({
                       required
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Certificate Type *
@@ -209,7 +235,7 @@ const VerificationStatus = ({
                       required
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Phone Number *
