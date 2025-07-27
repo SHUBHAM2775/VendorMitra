@@ -83,12 +83,12 @@ const Cart = ({ items, onClose, onRemoveItem, onUpdateQuantity, onOrderSuccess }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg sm:max-w-2xl max-h-[90vh] sm:max-h-[80vh] overflow-hidden mx-2 sm:mx-0">
         {/* Header */}
-        <div className="bg-green-600 text-white p-6 flex items-center justify-between">
+        <div className="bg-green-600 text-white p-4 sm:p-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold">{t('cart')}</h2>
-            <p className="text-green-100">{totalItems} items in cart</p>
+            <h2 className="text-lg sm:text-2xl font-bold">{t('cart')}</h2>
+            <p className="text-green-100 text-xs sm:text-base">{totalItems} items in cart</p>
           </div>
           <button
             onClick={onClose}
@@ -99,51 +99,51 @@ const Cart = ({ items, onClose, onRemoveItem, onUpdateQuantity, onOrderSuccess }
         </div>
 
         {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto max-h-96">
+        <div className="flex-1 overflow-y-auto max-h-60 sm:max-h-96">
           {items.length === 0 ? (
-            <div className="p-8 text-center">
-              <div className="text-gray-400 text-6xl mb-4">🛒</div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">Your cart is empty</h3>
-              <p className="text-gray-500">Add some items to get started!</p>
+            <div className="p-4 sm:p-8 text-center">
+              <div className="text-gray-400 text-5xl sm:text-6xl mb-4">🛒</div>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-600 mb-2">Your cart is empty</h3>
+              <p className="text-gray-500 text-sm sm:text-base">Add some items to get started!</p>
             </div>
           ) : (
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
               {items.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 transition">
+                <div key={item.id} className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 p-3 sm:p-4 border rounded-lg hover:bg-gray-50 transition">
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="w-16 h-16 object-cover rounded-lg"
+                    className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-lg"
                   />
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-800">{item.name}</h4>
-                    <p className="text-sm text-gray-600">{item.supplier}</p>
-                    <p className="text-green-600 font-bold">₹{item.price}</p>
+                  <div className="flex-1 w-full text-center sm:text-left">
+                    <h4 className="font-semibold text-gray-800 text-sm sm:text-base">{item.name}</h4>
+                    <p className="text-xs sm:text-sm text-gray-600">{item.supplier}</p>
+                    <p className="text-green-600 font-bold text-sm sm:text-base">₹{item.price}</p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-0">
                     <button
                       onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
                       disabled={item.quantity <= 1}
-                      className={`w-8 h-8 flex items-center justify-center rounded-full transition ${
+                      className={`w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full transition text-xs sm:text-base ${
                         item.quantity <= 1 
                           ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
                           : "bg-gray-200 hover:bg-gray-300"
                       }`}
                     >
-                      <FaMinus className="text-xs" />
+                      <FaMinus />
                     </button>
-                    <span className="w-8 text-center font-semibold">{item.quantity}</span>
+                    <span className="w-7 sm:w-8 text-center font-semibold text-sm sm:text-base">{item.quantity}</span>
                     <button
                       onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                      className="w-8 h-8 flex items-center justify-center bg-green-200 hover:bg-green-300 rounded-full transition"
+                      className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-green-200 hover:bg-green-300 rounded-full transition text-xs sm:text-base"
                     >
-                      <FaPlus className="text-xs" />
+                      <FaPlus />
                     </button>
                     <button
                       onClick={() => onRemoveItem(item.id)}
-                      className="w-8 h-8 flex items-center justify-center bg-red-200 hover:bg-red-300 rounded-full transition ml-2"
+                      className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center bg-red-200 hover:bg-red-300 rounded-full transition ml-1 sm:ml-2 text-xs sm:text-base"
                     >
-                      <FaTrash className="text-xs text-red-600" />
+                      <FaTrash className="text-red-600" />
                     </button>
                   </div>
                 </div>
@@ -154,21 +154,21 @@ const Cart = ({ items, onClose, onRemoveItem, onUpdateQuantity, onOrderSuccess }
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t p-6 bg-gray-50">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-lg font-semibold">Total:</span>
-              <span className="text-2xl font-bold text-green-600">₹{totalPrice}</span>
+          <div className="border-t p-4 sm:p-6 bg-gray-50">
+            <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-2 sm:gap-0">
+              <span className="text-base sm:text-lg font-semibold">Total:</span>
+              <span className="text-xl sm:text-2xl font-bold text-green-600">₹{totalPrice}</span>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 onClick={onClose}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-lg transition"
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 sm:py-3 px-4 rounded-lg transition text-sm sm:text-base"
               >
                 Continue Shopping
               </button>
               <button 
                 onClick={handlePlaceOrder}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition disabled:opacity-50"
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 sm:py-3 px-4 rounded-lg transition disabled:opacity-50 text-sm sm:text-base"
                 disabled={items.length === 0 || loading}
               >
                 {loading ? 'Placing Order...' : 'Place Order'}
