@@ -101,37 +101,25 @@ const Supplier = () => {
       // Use the secure API that automatically filters by current supplier
       const ordersData = await orderAPI.getMyOrders();
       
-      // Fetch product details for each order item
-      const ordersWithProductDetails = await Promise.all(
-        ordersData.map(async (order) => {
-          const itemsWithProductDetails = await Promise.all(
-            order.items.map(async (item) => {
-              try {
-                const productDetails = await productAPI.getProductById(item.productId);
-                return {
-                  ...item,
-                  productName: productDetails.name,
-                  productDescription: productDetails.description,
-                  productImage: productDetails.image
-                };
-              } catch (error) {
-                console.error(`Error fetching product details for ${item.productId}:`, error);
-                return {
-                  ...item,
-                  productName: "Product name unavailable",
-                  productDescription: "Product details unavailable",
-                  productImage: null
-                };
-              }
-            })
-          );
+      // Map order items to include product details from populated data
+      const ordersWithProductDetails = ordersData.map((order) => {
+        const itemsWithProductDetails = order.items.map((item) => {
+          // The product details are already populated by the backend
+          const productDetails = item.productId || {};
           
           return {
-            ...order,
-            items: itemsWithProductDetails
+            ...item,
+            productName: productDetails.name || "Product name unavailable",
+            productDescription: productDetails.description || "Product details unavailable",
+            productImage: productDetails.image || null
           };
-        })
-      );
+        });
+        
+        return {
+          ...order,
+          items: itemsWithProductDetails
+        };
+      });
       
       setOrders(ordersWithProductDetails);
     } catch (error) {
