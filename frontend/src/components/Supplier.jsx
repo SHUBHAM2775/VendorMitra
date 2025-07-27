@@ -50,29 +50,28 @@ const Supplier = () => {
   };
 
   // Function to fetch products from API
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
+const fetchStatus = async () => {
+  try {
+    const data = await getVerificationStatusById(user?.id);
 
-      // Use the secure API that automatically filters by current supplier
-      const response = await productAPI.getMyProducts();
-
-      const mappedProducts = response.map(mapApiProductToComponent);
-      setProducts(mappedProducts);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      setShowToast({ type: "error", message: "Failed to load products" });
-      // Keep empty array if error
-      setProducts([]);
-    } finally {
-      setLoading(false);
+    if (!data.verificationStatus || (data.verificationStatus === "pending" && !data.fssaiNumber)) {
+      setVerificationStatus("not_submitted");
+    } else if (data.verificationStatus === "approved") {
+      setVerificationStatus("verified");
+    } else {
+      setVerificationStatus(data.verificationStatus); // "pending" or "rejected"
     }
-  };
+  } catch (error) {
+    console.error("Error fetching verification status:", error);
+    setVerificationStatus("not_submitted");
+  }
+};
 
-  // Fetch products when component mounts or user changes
-  useEffect(() => {
-    fetchProducts();
-  }, [user?.id]);
+useEffect(() => {
+  if (user?.id) {
+    fetchStatus();
+  }
+}, [user?.id]);
 
   // Verification states
   const [isVerified, setIsVerified] = useState(false);
@@ -495,9 +494,9 @@ const Supplier = () => {
   handleVerificationSubmit={handleVerificationSubmit}
   submittingVerification={submittingVerification}
   verificationStatus={verificationStatus} // 🔥 Add this line
-   onSuccessfulSubmit={() => {
-    setShowVerificationForm(false);
-    setVerificationStatus("pending"); // <- Update local state!
+  onSuccessfulSubmit={() => {
+    fetchStatus(); // refetch status after submission
+    setShowVerificationForm(false); // optionally close modal
   }}
 />
 

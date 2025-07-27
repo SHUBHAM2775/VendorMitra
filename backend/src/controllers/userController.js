@@ -93,7 +93,7 @@ const getVerificationStatusById = async (req, res) => {
     const userId = req.params.id;
 
     const user = await User.findById(userId).select(
-      "isVerified verificationStatus"
+      "isVerified verificationStatus fssaiNumber"
     );
 
     if (!user) {
@@ -103,6 +103,7 @@ const getVerificationStatusById = async (req, res) => {
     res.status(200).json({
       isVerified: user.isVerified,
       verificationStatus: user.verificationStatus,
+      fssaiNumber: user.fssaiNumber,
     });
   } catch (error) {
     console.error("Error getting verification status:", error);
