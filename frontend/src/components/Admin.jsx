@@ -7,9 +7,7 @@ import {
   rejectSupplier,
   verifySupplier,
 } from "../services/adminServices";
-import SupplierManagement from "./admin/SupplierManagement";
-import BundleManagement from "./admin/BundleManagement";
-import IssueManagement from "./admin/IssueManagement";
+import SupplierManagement from "./Admin/SupplierManagement";
 import VerificationModal from "./admin/VerificationModal";
 
 const Admin = () => {
