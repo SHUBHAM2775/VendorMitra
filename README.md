@@ -18,8 +18,6 @@
 
 ## 🖼️ Screenshots
 
-> Replace the below with actual images or GitHub-hosted links (drag & drop in issues or commit)
-
 ### 🔐 Login Page  
 ![WhatsApp Image 2025-07-27 at 23 52 31_51b35228](https://github.com/user-attachments/assets/a5132791-ff09-4455-930f-132ceb13c2da)
 
