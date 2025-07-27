@@ -9,12 +9,13 @@ import DispatchManagement from "./Supplier/DispatchManagement";
 import Toast from "./Supplier/Toast";
 import { useAuth } from "../context/AuthContext";
 import { tokenManager, productAPI, orderAPI } from "../services/api";
+import { getVerificationStatusById } from "../../services/user"; 
+
 
 const Supplier = () => {
   const { user, logout } = useAuth();
   const [tab, setTab] = useState("Products");
   const [products, setProducts] = useState([]);
-  
   const [loading, setLoading] = useState(true);
   const [editIndex, setEditIndex] = useState(null);
   const [editProduct, setEditProduct] = useState(null);
@@ -71,8 +72,20 @@ const Supplier = () => {
 
   // Fetch products when component mounts or user changes
   useEffect(() => {
-    fetchProducts();
-  }, [user?.id]);
+  const fetchVerificationStatus = async () => {
+    try {
+      const statusData = await getVerificationStatusById(user._id);
+      setVerificationStatus(statusData.verificationStatus); // Make sure your backend sends { verificationStatus: "pending" }
+    } catch (error) {
+      console.error("Error fetching verification status:", error);
+    }
+  };
+
+  if (user?._id) {
+    fetchVerificationStatus();
+  }
+}, [user?._id]);
+
 
   // Verification states
   const [isVerified, setIsVerified] = useState(false);
@@ -486,20 +499,20 @@ const Supplier = () => {
       ) : (
         <>
           {/* Verification Status Component */}
-<VerificationStatus
-  userId={user?._id}
-  showVerificationForm={showVerificationForm}
-  setShowVerificationForm={setShowVerificationForm}
-  verificationForm={verificationForm}
-  handleVerificationFormChange={handleVerificationFormChange}
-  handleVerificationSubmit={handleVerificationSubmit}
-  submittingVerification={submittingVerification}
-  verificationStatus={verificationStatus} // 🔥 Add this line
-   onSuccessfulSubmit={() => {
-    setShowVerificationForm(false);
-    setVerificationStatus("pending"); // <- Update local state!
-  }}
-/>
+          <VerificationStatus
+            userId={user?._id}
+            showVerificationForm={showVerificationForm}
+            setShowVerificationForm={setShowVerificationForm}
+            verificationForm={verificationForm}
+            handleVerificationFormChange={handleVerificationFormChange}
+            handleVerificationSubmit={handleVerificationSubmit}
+            submittingVerification={submittingVerification}
+            verificationStatus={verificationStatus} // 🔥 Add this line
+            onSuccessfulSubmit={() => {
+              setShowVerificationForm(false);
+              setVerificationStatus("pending"); // <- Update local state!
+            }}
+          />
 
           {/* Summary Cards Component */}
           <SummaryCards products={products} orders={orders} />

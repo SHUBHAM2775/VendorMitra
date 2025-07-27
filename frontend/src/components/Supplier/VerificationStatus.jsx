@@ -11,30 +11,40 @@ const VerificationStatus = ({
   handleVerificationFormChange,
   handleVerificationSubmit,
   submittingVerification,
-   onSuccessfulSubmit,
+  onSuccessfulSubmit,
 }) => {
   const [verificationStatus, setVerificationStatus] = useState("not_submitted");
-const fetchStatus = async () => {
-  try {
-    const data = await getVerificationStatusById(userId);
+  const fetchStatus = async () => {
+    try {
+      const data = await getVerificationStatusById(userId);
 
-    if (!data.verificationStatus || (data.verificationStatus === "pending" && !data.fssaiNumber)) {
+      if (!data.verificationStatus || data.verificationStatus === "pending") {
+        if (!data.fssaiNumber) {
+          setVerificationStatus("not_submitted");
+        } else {
+          setVerificationStatus("pending");
+        }
+      } else if (data.verificationStatus === "approved") {
+        setVerificationStatus("verified");
+      } else {
+        setVerificationStatus(data.verificationStatus); // 'rejected'
+      }
+    } catch (error) {
+      console.error("Error fetching verification status:", error);
       setVerificationStatus("not_submitted");
-    } else if (data.verificationStatus === "approved") {
-      setVerificationStatus("verified");
-    } else {
-      setVerificationStatus(data.verificationStatus);
     }
-  } catch (error) {
-    console.error("Error fetching verification status:", error);
-    setVerificationStatus("not_submitted");
-  }
-};
+  };
 
-useEffect(() => {
-  if (userId) fetchStatus();
-}, [userId]);
 
+  useEffect(() => {
+    if (userId) fetchStatus();
+  }, [userId]);
+
+  useEffect(() => {
+    if (!showVerificationForm && userId) {
+      fetchStatus();
+    }
+  }, [showVerificationForm]);
 
   return (
     <>
@@ -151,17 +161,20 @@ useEffect(() => {
               </button>
             </div>
 
-<form
-  onSubmit={async (e) => {
-    e.preventDefault();
-    const success = await handleVerificationSubmit(e);
-    if (success) {
-      await fetchStatus(); // ← refresh after success
-      setShowVerificationForm(false); // ← close modal
-    }
-  }}
-  className="p-6"
->
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const success = await handleVerificationSubmit(e);
+                if (success) {
+                  await fetchStatus();            // ✅ Refresh UI
+                  setShowVerificationForm(false);
+                  if (onSuccessfulSubmit) {
+                    onSuccessfulSubmit();         // ✅ Notify parent component
+                  }
+                }
+              }}
+              className="p-6"
+            >
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
