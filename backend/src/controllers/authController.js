@@ -4,8 +4,8 @@ const generateToken = require("../utils/jwt");
 
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, phone, role, kycDocs, fssaiNumber } = req.body;
-
+    const { name, email, password, phone, role, kycDocs, fssaiNumber } =
+      req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -13,7 +13,6 @@ exports.register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
 
     const user = new User({
       name,
@@ -83,6 +82,5 @@ exports.getCurrentUser = (req, res) => {
 };
 
 exports.logout = (req, res) => {
-  // Simply responds to confirm logout — client deletes the token
   res.status(200).json({ message: "Logged out successfully" });
 };
