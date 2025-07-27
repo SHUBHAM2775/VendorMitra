@@ -14,6 +14,32 @@ const getPendingVerifications = async (req, res) => {
   }
 };
 
+const getRejectedVerifications = async (req, res) => {
+  try {
+    const rejectedSuppliers = await User.find({
+      role: "supplier",
+      verificationStatus: "rejected",
+    }).select("-password");
+
+    res.json({ suppliers: rejectedSuppliers });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+const getApprovedVerifications = async (req, res) => {
+  try {
+    const approvedSuppliers = await User.find({
+      role: "supplier",
+      verificationStatus: "approved",
+    }).select("-password");
+
+    res.json({ suppliers: approvedSuppliers });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 // PUT /api/admin/verify-supplier/:id
 const verifySupplier = async (req, res) => {
   try {
@@ -76,6 +102,8 @@ const getRejectedVerificationCount = async (req, res) => {
 
 module.exports = {
   getPendingVerifications,
+  getRejectedVerifications,
+  getApprovedVerifications,
   getPendingVerificationCount,
   getRejectedVerificationCount,
   verifySupplier,

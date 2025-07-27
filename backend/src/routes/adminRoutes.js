@@ -5,6 +5,8 @@ const {
   getPendingVerifications,
   getPendingVerificationCount,
   getRejectedVerificationCount,
+  getApprovedVerifications,
+  getRejectedVerifications,
 } = require("../controllers/adminController");
 const { authMiddleware, isAdmin } = require("../middleware/authMiddleware");
 
@@ -14,6 +16,8 @@ router.get(
   isAdmin,
   getPendingVerifications
 );
+router.get("/rejected-verifications", getRejectedVerifications);
+router.get("/approved-verifications", getApprovedVerifications);
 router.get(
   "/verification-pending-count",
   authMiddleware,
