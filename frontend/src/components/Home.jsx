@@ -350,13 +350,13 @@ function Home({ onAddToCart }) {
       )}
       
       {/* Hero Section with Search */}
-      <div className="bg-gradient-to-br from-green-50 to-blue-50 py-16 px-4">
+      <div className="bg-gradient-to-br from-green-50 to-blue-50 py-10 sm:py-14 md:py-16 px-2 sm:px-4 md:px-8">
         <div className="container mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+          <div className="text-center mb-6 md:mb-8">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-2 md:mb-4">
               {language === 'hi' ? 'अपने उत्पाद खोजें' : 'Find Your Products'}
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
               {language === 'hi' 
                 ? 'हजारों गुणवत्तापूर्ण उत्पादों में से चुनें और सर्वोत्तम आपूर्तिकर्ताओं से खरीदें' 
                 : 'Discover thousands of quality products from the best suppliers'
@@ -365,24 +365,24 @@ function Home({ onAddToCart }) {
           </div>
           
           {/* Enhanced Search Bar */}
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-full sm:max-w-2xl md:max-w-3xl mx-auto">
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FaSearch className="h-6 w-6 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                <FaSearch className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400" />
               </div>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={language === 'hi' ? 'उत्पाद, आपूर्तिकर्ता, या विवरण खोजें...' : 'Search products, suppliers, or descriptions...'}
-                className="block w-full pl-12 pr-12 py-4 text-lg border-2 border-gray-200 rounded-2xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-4 focus:ring-green-200 focus:border-green-500 text-gray-900 shadow-lg transition-all duration-200"
+                className="block w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 text-base sm:text-lg border-2 border-gray-200 rounded-xl sm:rounded-2xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 sm:focus:ring-4 focus:ring-green-200 focus:border-green-500 text-gray-900 shadow-md sm:shadow-lg transition-all duration-200"
               />
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-gray-100 rounded-r-2xl transition-colors duration-200"
+                  className="absolute inset-y-0 right-0 pr-3 sm:pr-4 flex items-center hover:bg-gray-100 rounded-r-xl sm:rounded-r-2xl transition-colors duration-200"
                 >
-                  <svg className="h-6 w-6 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -391,13 +391,13 @@ function Home({ onAddToCart }) {
             
             {/* Search Results Info */}
             {searchTerm && (
-              <div className="mt-4 text-sm text-gray-600 text-center">
+              <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600 text-center">
                 {filteredProducts.length === 0 ? (
-                  <span className="bg-white px-4 py-2 rounded-full shadow-sm inline-block">
+                  <span className="bg-white px-3 sm:px-4 py-1 sm:py-2 rounded-full shadow-sm inline-block">
                     {language === 'hi' ? 'कोई परिणाम नहीं मिला' : 'No results found'}
                   </span>
                 ) : (
-                  <span className="bg-white px-4 py-2 rounded-full shadow-sm inline-block">
+                  <span className="bg-white px-3 sm:px-4 py-1 sm:py-2 rounded-full shadow-sm inline-block">
                     {language === 'hi' 
                       ? `${filteredProducts.length} उत्पाद मिले` 
                       : `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} found`
@@ -410,11 +410,11 @@ function Home({ onAddToCart }) {
         </div>
       </div>
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8">
         
         {filteredProducts.length === 0 && !loading && !error ? (
-          <div className="text-center py-10">
-            <div className="text-gray-500 text-lg">
+          <div className="text-center py-8 sm:py-10">
+            <div className="text-gray-500 text-base sm:text-lg">
               {searchTerm 
                 ? (language === 'hi' ? 'कोई उत्पाद नहीं मिला' : 'No products found') 
                 : (language === 'hi' ? 'कोई उत्पाद उपलब्ध नहीं है' : 'No products available')
@@ -423,58 +423,58 @@ function Home({ onAddToCart }) {
             {searchTerm && (
               <button 
                 onClick={() => setSearchTerm('')}
-                className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                className="mt-3 sm:mt-4 bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base"
               >
                 {language === 'hi' ? 'सभी उत्पाद देखें' : 'View all products'}
               </button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 justify-items-center">
             {filteredProducts.map((item) => (
-              <div key={item.id} className="bg-white rounded-2xl shadow-lg w-full max-w-sm flex flex-col">
+              <div key={item.id} className="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg w-full max-w-xs sm:max-w-sm flex flex-col">
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="rounded-t-2xl h-48 w-full object-cover"
+                  className="rounded-t-xl sm:rounded-t-2xl h-40 sm:h-48 w-full object-cover object-center"
                 />
-                <div className="p-6 flex flex-col gap-3 flex-1">
-                  <h2 className="text-xl font-semibold">{getTranslatedField(item, 'name', language)}</h2>
-                  <div className="flex items-center justify-between">
-                    <div className="text-green-700 text-2xl font-bold">
+                <div className="p-4 sm:p-6 flex flex-col gap-2 sm:gap-3 flex-1">
+                  <h2 className="text-lg sm:text-xl font-semibold break-words">{getTranslatedField(item, 'name', language)}</h2>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
+                    <div className="text-green-700 text-xl sm:text-2xl font-bold">
                       ₹{item.price} / {item.unit}
                     </div>
                     {item.verified && (
-                      <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-1 rounded-full ml-2">
+                      <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-1 rounded-full mt-1 sm:mt-0 ml-0 sm:ml-2">
                         {t('verified')}
                       </span>
                     )}
                   </div>
-                  <div className="text-gray-700 font-medium">{getTranslatedField(item, 'supplier', language)}</div>
-                  <div className="flex items-center gap-2">
+                  <div className="text-gray-700 font-medium break-words">{getTranslatedField(item, 'supplier', language)}</div>
+                  <div className="flex items-center gap-1 sm:gap-2">
                     <RatingStars value={item.rating} />
-                    <span className="text-gray-500 text-sm">
+                    <span className="text-gray-500 text-xs sm:text-sm">
                       ({item.ratingCount})
                     </span>
                   </div>
-                  <hr className="my-2" />
-                  <div className="text-gray-600 text-sm flex items-center gap-2">
+                  <hr className="my-1 sm:my-2" />
+                  <div className="text-gray-600 text-xs sm:text-sm flex items-center gap-1 sm:gap-2">
                     <svg className="w-4 h-4 text-gray-400 inline" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 12.414a4 4 0 10-5.657 5.657l4.243 4.243a8 8 0 1011.314-11.314l-4.243 4.243z" /></svg>
                     {getTranslatedField(item, 'address', language)}
                   </div>
-                  <div className="text-gray-600 text-sm flex items-center gap-2">
+                  <div className="text-gray-600 text-xs sm:text-sm flex items-center gap-1 sm:gap-2">
                     <svg className="w-4 h-4 text-gray-400 inline" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-9 4v8" /></svg>
                     {item.delivery}
                   </div>
-                  <div className="text-gray-600 text-sm flex items-center gap-2">
+                  <div className="text-gray-600 text-xs sm:text-sm flex items-center gap-1 sm:gap-2">
                     <svg className="w-4 h-4 text-gray-400 inline" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5h2l.4 2M7 13h10l1.4-7H6.6M7 13l-1.4 7h10.8L17 13M7 13V5a2 2 0 012-2h6a2 2 0 012 2v8" /></svg>
                     {item.phone}
                   </div>
-                  <div className="flex items-center gap-2 mt-4">
-                    <span className="text-green-700 font-semibold">{item.inStock} {item.unit} {t('inStock')}</span>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-2 mt-2 sm:mt-4">
+                    <span className="text-green-700 font-semibold text-sm sm:text-base">{item.inStock} {item.unit} {t('inStock')}</span>
                     <button 
                       onClick={() => handleAddToCart(item)}
-                      className="ml-auto bg-green-600 hover:bg-green-700 text-white text-base px-6 py-2 rounded-lg flex items-center gap-2 font-semibold shadow transition duration-150 cursor-pointer"
+                      className="ml-0 sm:ml-auto bg-green-600 hover:bg-green-700 text-white text-sm sm:text-base px-4 sm:px-6 py-2 rounded-lg flex items-center gap-1 sm:gap-2 font-semibold shadow transition duration-150 cursor-pointer min-w-[120px] sm:min-w-[140px] justify-center"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l1.4-7H6.6M7 13l-1.4 7h10.8L17 13M7 13V5a2 2 0 012-2h6a2 2 0 012 2v8" /></svg>
                       {t('addToCart')}
