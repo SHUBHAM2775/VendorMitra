@@ -1,17 +1,31 @@
 import React from "react";
 import { FaEye, FaTimes, FaCheck } from "react-icons/fa";
 
-const SupplierManagement = ({
-  pendingSuppliers,
-  handleRejectSupplier,
-  handleApproveSupplier
-}) => {
-  const pendingSuppliersList = pendingSuppliers.filter(s => s.status === "pending");
+const SupplierManagement = ({ suppliers = [], handleApproveSupplier, handleRejectSupplier, statusFilter }) => {
+  const filteredSuppliersList = suppliers.filter(s => {
+    if (!statusFilter || statusFilter === "pending") {
+      return s.verificationStatus === "pending";
+    } else if (statusFilter === "approved") {
+      return s.verificationStatus === "approved" || s.isVerified;
+    } else if (statusFilter === "rejected") {
+      return s.verificationStatus === "rejected";
+    }
+    return true;
+  });
+
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Pending Suppliers</h2>
-      {pendingSuppliersList.map((supplier) => {
+      <div className="text-center py-8 text-gray-500">
+        {statusFilter === "approved"
+          ? "No approved suppliers"
+          : statusFilter === "rejected"
+            ? "No rejected suppliers"
+            : "No pending suppliers to approve"}
+      </div>
+
+
+      {filteredSuppliersList.map((supplier) => {
         const fssaiLink = `https://foscos.fssai.gov.in/verification/license?lic_no=${supplier.fssaiLicenseNumber}`;
         return (
           <div key={supplier.id} className="border-l-4 border-yellow-400 bg-yellow-50 p-4 rounded mb-4">
@@ -19,16 +33,15 @@ const SupplierManagement = ({
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="font-semibold text-lg">{supplier.name}</div>
-                  <span className={`px-2 py-1 rounded text-xs ${
-                    supplier.verificationStatus === "verified" 
-                      ? "bg-green-100 text-green-700" 
-                      : supplier.verificationStatus === "rejected"
+                  <span className={`px-2 py-1 rounded text-xs ${supplier.verificationStatus === "approved"
+                    ? "bg-green-100 text-green-700"
+                    : supplier.verificationStatus === "rejected"
                       ? "bg-red-100 text-red-700"
                       : "bg-yellow-100 text-yellow-700"
-                  }`}>
-                    {supplier.verificationStatus === "verified" ? "✓ Verified" :
-                     supplier.verificationStatus === "rejected" ? "✗ Rejected" :
-                     "⏳ Pending Verification"}
+                    }`}>
+                    {supplier.verificationStatus === "approved" ? "✓ Verified" :
+                      supplier.verificationStatus === "rejected" ? "✗ Rejected" :
+                        "⏳ Pending Verification"}
                   </span>
                 </div>
                 <div className="text-sm text-gray-600 mb-2">
@@ -37,12 +50,13 @@ const SupplierManagement = ({
                 <div className="text-sm text-gray-500 mb-2">
                   <span className="font-medium">Certificate:</span> {" "}
                   <a
-                    href={supplier.verificationDetails.certificateFile.url}
-                    download={supplier.verificationDetails.certificateFile.name}
+                    href={supplier.verificationDetails?.certificateFile?.url || "#"}
+                    download={supplier.verificationDetails?.certificateFile?.name}
                     className="text-blue-600 underline hover:text-blue-800"
                   >
-                    {supplier.verificationDetails.certificateFile.name}
+                    {supplier.verificationDetails?.certificateFile?.name || "Download"}
                   </a>
+
                 </div>
                 <div className="text-xs text-gray-400">Submitted: {supplier.submittedDate}</div>
               </div>
@@ -75,7 +89,7 @@ const SupplierManagement = ({
           </div>
         );
       })}
-      {pendingSuppliersList.length === 0 && (
+      {filteredSuppliersList.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           No pending suppliers to approve
         </div>

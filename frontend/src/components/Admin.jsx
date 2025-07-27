@@ -57,6 +57,10 @@ const Admin = () => {
           getRejectedVerifications(),
         ]);
 
+        console.log("Approved", approved);
+        console.log("Rejected", rejected);
+
+
         setPendingSuppliers(formatSuppliers(pending));
         setAcceptedSuppliers(formatSuppliers(approved));
         setRejectedSuppliers(formatSuppliers(rejected));
@@ -73,7 +77,7 @@ const Admin = () => {
     setPendingSuppliers(prev => {
       const supplier = prev.find(s => s.id === supplierId);
       if (!supplier) return prev;
-      setAcceptedSuppliers(acc => [...acc, { ...supplier, verificationStatus: "verified" }]);
+      setAcceptedSuppliers(acc => [...acc, { ...supplier, verificationStatus: "approved" }]);
       return prev.filter(s => s.id !== supplierId);
     });
   };
@@ -88,24 +92,19 @@ const Admin = () => {
   };
 
   // 🟡 Modal Verification Handlers
-  const handleVerifySupplier = (supplier) => {
-    setSelectedSupplier(supplier);
-    setShowVerificationModal(true);
-  };
-
   const handleApproveVerification = (supplierId) => {
     setPendingSuppliers(prev =>
       prev.map(supplier =>
         supplier.id === supplierId
           ? {
-              ...supplier,
-              verificationStatus: "verified",
-              verificationDetails: {
-                ...supplier.verificationDetails,
-                verifiedDate: new Date().toISOString().split("T")[0],
-                verifiedBy: "Admin",
-              },
-            }
+            ...supplier,
+            verificationStatus: "approved",
+            verificationDetails: {
+              ...supplier.verificationDetails,
+              verifiedDate: new Date().toISOString().split("T")[0],
+              verifiedBy: "Admin",
+            },
+          }
           : supplier
       )
     );
@@ -117,14 +116,14 @@ const Admin = () => {
       prev.map(supplier =>
         supplier.id === supplierId
           ? {
-              ...supplier,
-              verificationStatus: "rejected",
-              verificationDetails: {
-                ...supplier.verificationDetails,
-                rejectedDate: new Date().toISOString().split("T")[0],
-                rejectedBy: "Admin",
-              },
-            }
+            ...supplier,
+            verificationStatus: "rejected",
+            verificationDetails: {
+              ...supplier.verificationDetails,
+              rejectedDate: new Date().toISOString().split("T")[0],
+              rejectedBy: "Admin",
+            },
+          }
           : supplier
       )
     );
@@ -143,8 +142,8 @@ const Admin = () => {
   // 🟣 Bundle and Issue Handlers (demo logic)
   const [bundles, setBundles] = useState([]);
   const [issues, setIssues] = useState([]);
-  const handleToggleBundle = () => {};
-  const handleUpdateIssueStatus = () => {};
+  const handleToggleBundle = () => { };
+  const handleUpdateIssueStatus = () => { };
 
   return (
     <div className="min-h-screen bg-[#faf8ff]">
@@ -156,11 +155,10 @@ const Admin = () => {
             {["Pending", "Accepted", "Rejected", "Bundles", "Issues"].map(tabName => (
               <button
                 key={tabName}
-                className={`px-6 py-3 font-medium transition ${
-                  tab === tabName
-                    ? "text-green-600 border-b-2 border-green-600 bg-green-50"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                }`}
+                className={`px-6 py-3 font-medium transition ${tab === tabName
+                  ? "text-green-600 border-b-2 border-green-600 bg-green-50"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                  }`}
                 onClick={() => setTab(tabName)}
               >
                 {tabName}
@@ -173,7 +171,7 @@ const Admin = () => {
       <div className="bg-white rounded-b-lg shadow mx-0 mb-8 p-6 mt-0">
         {tab === "Pending" && (
           <SupplierManagement
-            pendingSuppliers={pendingSuppliers}
+            suppliers={pendingSuppliers}
             handleRejectSupplier={handleRejectSupplier}
             handleApproveSupplier={handleApproveSupplier}
           />
@@ -181,26 +179,24 @@ const Admin = () => {
 
         {tab === "Accepted" && (
           <SupplierManagement
-            pendingSuppliers={acceptedSuppliers}
-            handleRejectSupplier={() => {}}
-            handleApproveSupplier={() => {}}
+            suppliers={acceptedSuppliers}
+            handleRejectSupplier={() => { }}
+            handleApproveSupplier={() => { }}
             statusFilter="accepted"
           />
         )}
-        
+
         {tab === "Rejected" && (
           <SupplierManagement
-            pendingSuppliers={rejectedSuppliers}
-            handleRejectSupplier={() => {}}
-            handleApproveSupplier={() => {}}
+            suppliers={rejectedSuppliers}
+            handleRejectSupplier={() => { }}
+            handleApproveSupplier={() => { }}
+            statusFilter="rejected" // ← this is missing
           />
         )}
-        {tab === "Bundles" && (
-          <BundleManagement bundles={bundles} handleUpdateIssueStatus={handleUpdateIssueStatus} />
-        )}
-        {tab === "Issues" && (
-          <IssueManagement issues={issues} handleUpdateIssueStatus={handleUpdateIssueStatus} />
-        )}
+
+
+
       </div>
 
       <VerificationModal
